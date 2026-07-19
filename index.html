@@ -1,1750 +1,948 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Викторина</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Анастасия</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet" />
+
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
-        body { font-family: system-ui, -apple-system, sans-serif; background: #0f0e17; color: #fffffe; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; touch-action: manipulation; padding: 10px; }
-        #app { width: 100%; max-width: 480px; padding: 20px; background: #1a1a2e; border-radius: 28px; min-height: 600px; display: flex; flex-direction: column; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.7); }
-        .screen { display: none; flex-direction: column; align-items: center; justify-content: flex-start; flex: 1; gap: 16px; animation: fadeIn 0.35s ease; padding: 4px 0; }
-        .screen.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-        button { background: #ff8906; border: none; color: #0f0e17; font-size: 1.1rem; font-weight: 700; padding: 14px 28px; border-radius: 40px; cursor: pointer; transition: background 0.2s, transform 0.1s; touch-action: manipulation; min-width: 180px; box-shadow: 0 4px 20px rgba(255, 137, 6, 0.35); }
-        button:active { transform: scale(0.95); background: #e67a00; }
-        button.secondary { background: #2d2d44; color: #fffffe; box-shadow: 0 4px 15px rgba(45, 45, 68, 0.5); }
-        button.secondary:active { background: #3d3d55; }
-        button.small { font-size: 0.9rem; padding: 10px 18px; min-width: 100px; }
-        #menu-screen { justify-content: center; gap: 12px; }
-        #menu-screen h1 { font-size: 2.6rem; font-weight: 900; background: linear-gradient(135deg, #ff8906, #f25f4c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; text-align: center; }
-        #menu-screen .subtitle { font-size: 1rem; color: #a7a9be; text-align: center; margin-bottom: 10px; }
-        #category-screen h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; text-align: center; }
-        .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-height: 400px; overflow-y: auto; padding: 4px 2px; }
-        .category-grid::-webkit-scrollbar { width: 4px; }
-        .category-grid::-webkit-scrollbar-thumb { background: #ff8906; border-radius: 10px; }
-        .category-btn { background: #2d2d44; border: 2px solid #3d3d55; border-radius: 16px; padding: 14px 8px; font-size: 0.95rem; font-weight: 600; color: #fffffe; transition: background 0.2s, border-color 0.2s, transform 0.1s; touch-action: manipulation; min-width: 0; width: 100%; text-align: center; line-height: 1.3; cursor: pointer; }
-        .category-btn:active { transform: scale(0.94); background: #3d3d55; }
-        .category-btn.selected { border-color: #ff8906; background: #3d2d1a; }
-        .category-btn .cat-count { font-size: 0.7rem; color: #a7a9be; display: block; margin-top: 2px; }
-        #progress-container { width: 100%; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-        #progress-bar-wrap { flex: 1; height: 8px; background: #2d2d44; border-radius: 10px; overflow: hidden; }
-        #progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ff8906, #f25f4c); border-radius: 10px; transition: width 0.3s ease; }
-        #question-counter { font-size: 0.8rem; font-weight: 600; color: #a7a9be; white-space: nowrap; }
-        #category-label { font-size: 0.75rem; color: #ff8906; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; text-align: center; width: 100%; }
-        #question-text { font-size: 1.3rem; font-weight: 600; text-align: center; padding: 12px 0; line-height: 1.5; min-height: 70px; display: flex; align-items: center; justify-content: center; width: 100%; }
-        #answers-container { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin: 4px 0; }
-        .answer-btn { background: #1a1a2e; border: 2px solid #2d2d44; border-radius: 16px; padding: 14px 8px; font-size: 1rem; color: #fffffe; transition: background 0.2s, border-color 0.2s, transform 0.1s; min-height: 60px; display: flex; align-items: center; justify-content: center; text-align: center; touch-action: manipulation; min-width: 0; width: 100%; font-weight: 500; cursor: pointer; }
-        .answer-btn:active { transform: scale(0.95); }
-        .answer-btn.correct { background: #2e7d32; border-color: #4caf50; }
-        .answer-btn.wrong { background: #b71c1c; border-color: #f44336; }
-        .answer-btn.disabled { pointer-events: none; opacity: 0.5; }
-        #timer-container { width: 100%; display: flex; align-items: center; gap: 10px; margin-top: 4px; }
-        #timer-bar-wrap { flex: 1; height: 5px; background: #2d2d44; border-radius: 10px; overflow: hidden; }
-        #timer-bar { height: 100%; width: 100%; background: #f25f4c; border-radius: 10px; transition: width 0.1s linear; }
-        #timer-text { font-size: 1.1rem; font-weight: 700; color: #f25f4c; min-width: 28px; text-align: right; }
-        #result-screen { justify-content: center; gap: 12px; }
-        #result-screen h2 { font-size: 2rem; font-weight: 800; text-align: center; }
-        #result-text { font-size: 1.2rem; text-align: center; background: #1a1a2e; padding: 16px 24px; border-radius: 16px; width: 100%; max-width: 320px; border: 1px solid #2d2d44; }
-        #result-detail { font-size: 0.95rem; color: #a7a9be; text-align: center; }
-        .result-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 8px; }
-        .overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(8px); border-radius: 28px; display: none; justify-content: center; align-items: center; z-index: 100; animation: fadeIn 0.3s ease; }
-        .overlay.visible { display: flex; }
-        .pause-box { background: #1a1a2e; padding: 40px 30px; border-radius: 30px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.9); max-width: 320px; width: 100%; border: 1px solid #2d2d44; }
-        .pause-box h2 { font-size: 1.6rem; margin-bottom: 16px; }
-        @media (max-width: 480px) {
-            #app { padding: 14px; border-radius: 20px; min-height: 92vh; }
-            #question-text { font-size: 1.1rem; min-height: 56px; padding: 8px 0; }
-            .answer-btn { font-size: 0.9rem; padding: 12px 6px; min-height: 52px; }
-            button { font-size: 1rem; padding: 12px 20px; min-width: 140px; }
-            #menu-screen h1 { font-size: 2.2rem; }
-            .category-btn { font-size: 0.85rem; padding: 12px 6px; }
-            .category-grid { gap: 8px; }
+        /* ----- общие сбросы и фон ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @media (max-width: 360px) {
-            #answers-container { gap: 6px; }
-            .answer-btn { font-size: 0.8rem; padding: 10px 4px; min-height: 44px; }
-            #question-text { font-size: 1rem; min-height: 48px; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Quicksand', sans-serif;
+            padding: 20px;
+            transition: background 0.5s, color 0.5s;
+            position: relative;
+            overflow: hidden;
         }
-        @media (orientation: landscape) and (max-height: 500px) {
-            #app { min-height: 95vh; padding: 10px; }
-            #question-text { font-size: 1rem; min-height: 36px; padding: 4px 0; }
-            .answer-btn { min-height: 38px; padding: 6px 4px; font-size: 0.8rem; }
-            #timer-container { margin-top: 0; }
-            .category-grid { max-height: 200px; }
+
+        /* Светлая тема (по умолчанию) */
+        body.light {
+            background: linear-gradient(145deg, #c8e7f0 0%, #d4f0f0 40%, #fce4ec 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease-in-out infinite alternate;
+        }
+
+        /* Тёмная тема */
+        body.dark {
+            background: linear-gradient(145deg, #0f1a24 0%, #1a1a2e 40%, #2d1b2e 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 30%; }
+            100% { background-position: 100% 70%; }
+        }
+
+        /* ===== ИНТЕРАКТИВНЫЙ ФОН С РЯБЬЮ ===== */
+        #rippleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* ===== СТЕКЛЯННЫЕ ПУЗЫРЬКИ ===== */
+        .bubbles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: rise linear infinite;
+            pointer-events: none;
+        }
+
+        body.light .bubble {
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.4), rgba(100, 200, 255, 0.1));
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark .bubble {
+            background: radial-gradient(circle at 30% 30%, rgba(100, 200, 255, 0.2), rgba(50, 100, 150, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @keyframes rise {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0.15;
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                transform: translateY(-110vh) translateX(50px) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* ----- главный контейнер (стекло) ----- */
+        .glass-wrapper {
+            max-width: 950px;
+            width: 100%;
+            padding: 30px 25px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(16px) saturate(200%);
+            -webkit-backdrop-filter: blur(16px) saturate(200%);
+            border-radius: 60px 20px 60px 20px;
+            box-shadow: 0 20px 50px rgba(0, 40, 60, 0.15),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+            perspective: 1000px;
+        }
+
+        body.dark .glass-wrapper {
+            background: rgba(20, 30, 40, 0.4);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Декоративные элементы (капли) */
+        .glass-wrapper::before,
+        .glass-wrapper::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-wrapper::before {
+            width: 150px;
+            height: 150px;
+            top: -30px;
+            right: -20px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 220, 240, 0.3), rgba(180, 230, 240, 0.05));
+        }
+
+        .glass-wrapper::after {
+            width: 200px;
+            height: 200px;
+            bottom: -60px;
+            left: -40px;
+            background: radial-gradient(circle at 70% 70%, rgba(160, 230, 240, 0.2), rgba(255, 200, 220, 0.05));
+        }
+
+        /* ===== ВЕРХНЯЯ ПАНЕЛЬ: ДАТА СЛЕВА, КНОПКА ТЕМЫ СПРАВА ===== */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 8px 5px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .date-display {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1d4b5e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 8px 18px;
+            border-radius: 30px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        body.dark .date-display {
+            color: #b3dff0;
+            background: rgba(20, 30, 40, 0.3);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .date-display .icon {
+            font-size: 1.2rem;
+        }
+
+        /* Кнопка переключения темы (справа) */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 10px 16px;
+            color: #1e3b4a;
+            cursor: pointer;
+            font-size: 1.3rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark .theme-toggle {
+            color: #e0f0ff;
+            background: rgba(30, 50, 70, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== 3D-ЭФФЕКТ ДЛЯ КОНТЕЙНЕРА ===== */
+        .glass-wrapper.tilt {
+            transition: transform 0.1s ease-out;
+        }
+
+        /* ----- сетка с блоками ----- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 22px;
+            justify-content: center;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== КАРТОЧКИ С АНИМИРОВАННЫМ ГРАДИЕНТОМ ===== */
+        .glass-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 12px;
+            border-radius: 40px 12px 40px 12px;
+            box-shadow: 0 8px 25px rgba(0, 30, 40, 0.08),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            cursor: pointer;
+            text-decoration: none;
+            color: #1e3b4a;
+            font-weight: 600;
+            text-align: center;
+            min-height: 150px;
+            transform: scale(1);
+            word-break: break-word;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+            /* Анимированный градиент */
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(200, 240, 255, 0.15), rgba(255, 200, 220, 0.15));
+            background-size: 300% 300%;
+            animation: cardGradient 6s ease-in-out infinite alternate, fadeInUp 0.6s ease forwards;
+        }
+
+        body.dark .glass-card {
+            color: #e0f0ff;
+            background: linear-gradient(135deg, rgba(30, 50, 70, 0.3), rgba(20, 60, 80, 0.2), rgba(70, 30, 50, 0.2));
+            background-size: 300% 300%;
+            animation: cardGradientDark 6s ease-in-out infinite alternate, fadeInUp 0.6s ease forwards;
+        }
+
+        @keyframes cardGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes cardGradientDark {
+            0% { background-position: 0% 50%; background: linear-gradient(135deg, rgba(30, 50, 70, 0.3), rgba(20, 60, 80, 0.2), rgba(70, 30, 50, 0.2)); }
+            50% { background-position: 100% 50%; background: linear-gradient(135deg, rgba(20, 60, 80, 0.2), rgba(70, 30, 50, 0.2), rgba(30, 50, 70, 0.3)); }
+            100% { background-position: 0% 50%; background: linear-gradient(135deg, rgba(30, 50, 70, 0.3), rgba(20, 60, 80, 0.2), rgba(70, 30, 50, 0.2)); }
+        }
+
+        /* Анимация появления с задержкой (переопределяем, чтобы не конфликтовать) */
+        .glass-card:nth-child(1) { animation-delay: 0.05s; }
+        .glass-card:nth-child(2) { animation-delay: 0.1s; }
+        .glass-card:nth-child(3) { animation-delay: 0.15s; }
+        .glass-card:nth-child(4) { animation-delay: 0.2s; }
+        .glass-card:nth-child(5) { animation-delay: 0.25s; }
+        .glass-card:nth-child(6) { animation-delay: 0.3s; }
+        .glass-card:nth-child(7) { animation-delay: 0.35s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Градиентная обводка */
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 40px 12px 40px 12px;
+            padding: 2px;
+            background: linear-gradient(135deg, #80deea, #f8bbd0, #b3e5fc);
+            background-size: 300% 300%;
+            animation: borderGradient 4s ease-in-out infinite alternate;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        body.dark .glass-card::before {
+            background: linear-gradient(135deg, #4dd0e1, #f48fb1, #4fc3f7);
+            background-size: 300% 300%;
+            animation: borderGradientDark 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes borderGradient {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        @keyframes borderGradientDark {
+            0% { background-position: 0% 50%; background: linear-gradient(135deg, #4dd0e1, #f48fb1, #4fc3f7); }
+            100% { background-position: 100% 50%; background: linear-gradient(135deg, #f48fb1, #4fc3f7, #4dd0e1); }
+        }
+
+        .glass-card:hover::before {
+            opacity: 1;
+        }
+
+        /* Свечение при наведении */
+        .glass-card:hover {
+            transform: scale(1.05) translateY(-8px);
+            box-shadow: 0 0 40px rgba(100, 200, 255, 0.2),
+                        0 0 80px rgba(255, 150, 200, 0.15),
+                        0 18px 40px rgba(0, 60, 80, 0.15),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        body.dark .glass-card:hover {
+            box-shadow: 0 0 40px rgba(100, 200, 255, 0.3),
+                        0 0 80px rgba(255, 150, 200, 0.2),
+                        0 18px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .glass-card:active {
+            transform: scale(0.95);
+        }
+
+        /* Всплывающая подсказка (tooltip) */
+        .glass-card::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            white-space: nowrap;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            pointer-events: none;
+            transform: translateX(-50%) translateY(5px);
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-card:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* ----- иконки и текст внутри блоков ----- */
+        .card-icon {
+            font-size: 2.6rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 4px 8px rgba(0, 30, 40, 0.1));
+            transition: transform 0.3s;
+        }
+
+        .glass-card:hover .card-icon {
+            transform: scale(1.1) rotate(-5deg);
+        }
+
+        .card-label {
+            font-size: 1rem;
+            letter-spacing: 0.4px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 6px 14px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+            font-weight: 600;
+            color: inherit;
+            text-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
+            transition: background 0.3s;
+        }
+
+        .glass-card:hover .card-label {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        body.dark .card-label {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark .glass-card:hover .card-label {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Индикатор онлайн */
+        .online-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            background: #4caf50;
+            border-radius: 50%;
+            margin-left: 8px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        /* ----- заголовок ----- */
+        .header-title {
+            font-size: 2.1rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 10px;
+            color: #1d4b5e;
+            letter-spacing: 1px;
+            text-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(6px);
+            padding: 10px 20px;
+            border-radius: 100px;
+            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-left: auto;
+            margin-right: auto;
+            width: fit-content;
+            transition: all 0.3s;
+        }
+
+        body.dark .header-title {
+            color: #b3dff0;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .header-wrap {
+            text-align: center;
+        }
+
+        /* ===== СЛУЧАЙНАЯ ЦИТАТА ===== */
+        .quote-container {
+            text-align: center;
+            margin: 5px 0 20px 0;
+            padding: 8px 20px;
+            font-size: 1rem;
+            font-style: italic;
+            color: #2d5a6b;
+            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            border-radius: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        body.dark .quote-container {
+            color: #8ab3c4;
+            background: rgba(20, 30, 40, 0.2);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .quote-container .quote-icon {
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+
+        .quote-container .quote-text {
+            font-weight: 400;
+        }
+
+        .quote-container .quote-author {
+            font-weight: 600;
+            opacity: 0.7;
+            font-size: 0.85rem;
+        }
+
+        /* Подпись внизу */
+        .footer-text {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 1.1rem;
+            color: #2d5a6b;
+            opacity: 0.8;
+            letter-spacing: 2px;
+            backdrop-filter: blur(4px);
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .footer-text:hover {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+
+        body.dark .footer-text {
+            color: #8ab3c4;
+        }
+
+        /* ----- адаптивность ----- */
+        @media (max-width: 600px) {
+            .glass-wrapper {
+                padding: 20px 15px;
+                border-radius: 40px 10px 40px 10px;
+            }
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 16px;
+            }
+            .glass-card {
+                min-height: 120px;
+                padding: 16px 8px;
+            }
+            .card-icon {
+                font-size: 2.2rem;
+            }
+            .header-title {
+                font-size: 1.6rem;
+                padding: 8px 16px;
+            }
+            .glass-card::after {
+                display: none;
+            }
+            .theme-toggle {
+                padding: 8px 14px;
+                font-size: 1.2rem;
+            }
+            .footer-text {
+                font-size: 0.9rem;
+            }
+            .date-display {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+            .date-display .icon {
+                font-size: 1rem;
+            }
+            .top-bar {
+                margin-bottom: 12px;
+            }
+            .quote-container {
+                font-size: 0.85rem;
+                padding: 6px 14px;
+                min-height: 32px;
+            }
         }
     </style>
 </head>
-<body>
-    <div id="app">
-        <!-- МЕНЮ -->
-        <div id="menu-screen" class="screen active">
-            <h1 id="game-title">Викторина</h1>
-            <p class="subtitle" id="menu-subtitle">Проверьте свои знания!</p>
-            <button id="start-btn">Начать</button>
+<body class="light">
+
+    <!-- ===== ИНТЕРАКТИВНЫЙ ФОН С РЯБЬЮ ===== -->
+    <canvas id="rippleCanvas"></canvas>
+
+    <!-- ===== СТЕКЛЯННЫЕ ПУЗЫРЬКИ ===== -->
+    <div class="bubbles-container" id="bubblesContainer"></div>
+
+    <!-- ===== ОСНОВНОЙ КОНТЕНТ ===== -->
+    <div class="glass-wrapper" id="glassWrapper">
+
+        <!-- Верхняя панель: дата слева, кнопка темы справа -->
+        <div class="top-bar">
+            <div class="date-display">
+                <span class="icon">📅</span>
+                <span id="currentDate">Загрузка...</span>
+            </div>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
+                🌙
+            </button>
         </div>
 
-        <!-- ВЫБОР КАТЕГОРИИ -->
-        <div id="category-screen" class="screen">
-            <h2 id="cat-title">Выберите категорию</h2>
-            <div class="category-grid" id="category-grid"></div>
-            <button id="cat-start-btn" class="secondary small" style="min-width:120px;">Играть</button>
+        <div class="header-wrap">
+            <div class="header-title">✦ привет ✦</div>
         </div>
 
-        <!-- ИГРА -->
-        <div id="game-screen" class="screen">
-            <div id="progress-container">
-                <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
-                <span id="question-counter">1/30</span>
-            </div>
-            <div id="category-label">Категория</div>
-            <div id="question-text">Загрузка...</div>
-            <div id="answers-container">
-                <button class="answer-btn" data-index="0">A</button>
-                <button class="answer-btn" data-index="1">B</button>
-                <button class="answer-btn" data-index="2">C</button>
-                <button class="answer-btn" data-index="3">D</button>
-            </div>
-            <div id="timer-container">
-                <div id="timer-bar-wrap"><div id="timer-bar"></div></div>
-                <span id="timer-text">10</span>
-            </div>
+        <!-- ===== СЛУЧАЙНАЯ ЦИТАТА ===== -->
+        <div class="quote-container" id="quoteContainer">
+            <span class="quote-icon">💭</span>
+            <span class="quote-text" id="quoteText">Загрузка цитаты...</span>
+            <span class="quote-author" id="quoteAuthor"></span>
         </div>
 
-        <!-- РЕЗУЛЬТАТ -->
-        <div id="result-screen" class="screen">
-            <h2 id="result-title">Результат</h2>
-            <p id="result-text">Правильных: 0 из 30</p>
-            <p id="result-detail">Вы ответили на 0 вопросов</p>
-            <div class="result-actions">
-                <button id="restart-btn">Начать заново</button>
-                <button id="menu-btn" class="secondary">Меню</button>
-            </div>
+        <div class="grid">
+            <!-- 1. Твич -->
+            <a href="https://twitch.tv/ваш_канал" target="_blank" class="glass-card" data-tooltip="Перейти на Twitch">
+                <div class="card-icon">🎮</div>
+                <span class="card-label">
+                    Мой Twitch
+                    <span class="online-indicator"></span>
+                </span>
+            </a>
+
+            <!-- 2. Группа (основная) -->
+            <a href="https://vk.com/ваша_группа" target="_blank" class="glass-card" data-tooltip="Перейти в группу">
+                <div class="card-icon">📢</div>
+                <span class="card-label">Моя группа</span>
+            </a>
+
+            <!-- 3. Почта -->
+            <a href="mailto:ваша@почта.ru" target="_blank" class="glass-card" data-tooltip="Написать письмо">
+                <div class="card-icon">✉️</div>
+                <span class="card-label">Почта</span>
+            </a>
+
+            <!-- 4. Донат -->
+            <a href="https://www.donationalerts.com/r/ваш_ник" target="_blank" class="glass-card" data-tooltip="Поддержать донатом">
+                <div class="card-icon">💎</div>
+                <span class="card-label">Донат</span>
+            </a>
+
+            <!-- 5. Стим -->
+            <a href="https://steamcommunity.com/id/ваш_айди" target="_blank" class="glass-card" data-tooltip="Перейти в Steam">
+                <div class="card-icon">🕹️</div>
+                <span class="card-label">Steam</span>
+            </a>
+
+            <!-- 6. Запасная группа -->
+            <a href="https://vk.com/запасная_группа" target="_blank" class="glass-card" data-tooltip="Запасной канал связи">
+                <div class="card-icon">🌀</div>
+                <span class="card-label">Запасная группа</span>
+            </a>
+
+            <!-- 7. В разработке -->
+            <a href="#" target="_blank" class="glass-card" data-tooltip="Скоро здесь что-то появится" style="opacity: 0.9;">
+                <div class="card-icon">⚙️</div>
+                <span class="card-label">В разработке</span>
+            </a>
         </div>
 
-        <!-- ПАУЗА -->
-        <div id="pause-overlay" class="overlay">
-            <div class="pause-box">
-                <h2 id="pause-title">Пауза</h2>
-                <button id="resume-btn">Продолжить</button>
-            </div>
+        <div class="footer-text">
+            ✦ Добро Пожаловать ✦
         </div>
     </div>
 
-    <script src="https://yandex.ru/games/sdk/v2"></script>
+    <!-- Библиотека для частиц -->
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
     <script>
-    (function() {
-        'use strict';
+        // =============================================
+        // 1. ИНТЕРАКТИВНЫЙ ФОН С РЯБЬЮ
+        // =============================================
+        (function() {
+            const canvas = document.getElementById('rippleCanvas');
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            let ripples = [];
+            const MAX_RIPPLES = 15;
+            let mouseX = -1000, mouseY = -1000;
 
-        // ================================================================
-        // 1. ВСЕ 300 ВОПРОСОВ (поля для 5 языков: ru, en, be, kk, uz)
-        //    Для be, kk, uz пока скопирован русский текст.
-        //    Замените на реальные переводы, когда они будут готовы.
-        // ================================================================
-        const questions = [
-            // ===== 1. ГЕОГРАФИЯ (30) =====
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица России?', o: ['Москва','Санкт-Петербург','Киев','Минск'], c:0 },
-                en: { q: 'Capital of Russia?', o: ['Moscow','St. Petersburg','Kyiv','Minsk'], c:0 },
-                be: { q: 'Сталіца Расіі?', o: ['Масква','Санкт-Пецярбург','Кіеў','Мінск'], c:0 },
-                kk: { q: 'Ресей астанасы?', o: ['Мәскеу','Санкт-Петербург','Киев','Минск'], c:0 },
-                uz: { q: 'Rossiya poytaxti?', o: ['Moskva','Sankt-Peterburg','Kiyev','Minsk'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самая длинная река в мире?', o: ['Нил','Амазонка','Миссисипи','Янцзы'], c:0 },
-                en: { q: 'The longest river in the world?', o: ['Nile','Amazon','Mississippi','Yangtze'], c:0 },
-                be: { q: 'Самая доўгая рака ў свеце?', o: ['Ніл','Амазонка','Місісіпі','Янцзы'], c:0 },
-                kk: { q: 'Əлемдегі ең ұзын өзен?', o: ['Ніл','Амазонка','Миссисипи','Янцзы'], c:0 },
-                uz: { q: 'Dunyodagi eng uzun daryo?', o: ['Nil','Amazonka','Missisipi','Yantszi'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самая высокая гора в мире?', o: ['Эверест','К2','Канченджанга','Лхоцзе'], c:0 },
-                en: { q: 'The highest mountain in the world?', o: ['Everest','K2','Kangchenjunga','Lhotse'], c:0 },
-                be: { q: 'Самая высокая гара ў свеце?', o: ['Эверэст','К2','Канчэнджанга','Лхоцзэ'], c:0 },
-                kk: { q: 'Əлемдегі ең биік тау?', o: ['Эверест','К2','Канченджанга','Лхоцзе'], c:0 },
-                uz: { q: 'Dunyodagi eng baland tog\'?', o: ['Everest','K2','Kanchenjanga','Lhotse'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самый маленький материк?', o: ['Австралия','Европа','Антарктида','Северная Америка'], c:0 },
-                en: { q: 'The smallest continent?', o: ['Australia','Europe','Antarctica','North America'], c:0 },
-                be: { q: 'Самы маленькі мацярык?', o: ['Аўстралія','Еўропа','Антарктыда','Паўночная Амерыка'], c:0 },
-                kk: { q: 'Ең кіші құрлық?', o: ['Аустралия','Еуропа','Антарктида','Солтүстік Америка'], c:0 },
-                uz: { q: 'Eng kichik qit\'a?', o: ['Avstraliya','Yevropa','Antarktida','Shimoliy Amerika'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самое большое озеро в мире?', o: ['Каспийское','Верхнее','Виктория','Гурон'], c:0 },
-                en: { q: 'The largest lake in the world?', o: ['Caspian','Superior','Victoria','Huron'], c:0 },
-                be: { q: 'Самае вялікае возера ў свеце?', o: ['Каспійскае','Верхняе','Вікторыя','Гурон'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен көл?', o: ['Каспий','Жоғарғы','Виктория','Гурон'], c:0 },
-                uz: { q: 'Dunyodagi eng katta ko\'l?', o: ['Kaspiy','Yuqori','Viktoriya','Guron'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Сколько континентов на Земле?', o: ['5','6','7','8'], c:1 },
-                en: { q: 'How many continents on Earth?', o: ['5','6','7','8'], c:1 },
-                be: { q: 'Колькі кантынентаў на Зямлі?', o: ['5','6','7','8'], c:1 },
-                kk: { q: 'Жерде неше құрлық бар?', o: ['5','6','7','8'], c:1 },
-                uz: { q: 'Yerda nechta qit\'a bor?', o: ['5','6','7','8'], c:1 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самая большая страна по площади?', o: ['Россия','Канада','Китай','США'], c:0 },
-                en: { q: 'The largest country by area?', o: ['Russia','Canada','China','USA'], c:0 },
-                be: { q: 'Самая вялікая краіна па плошчы?', o: ['Расія','Канада','Кітай','ЗША'], c:0 },
-                kk: { q: 'Ауданы бойынша ең үлкен ел?', o: ['Ресей','Канада','Қытай','АҚШ'], c:0 },
-                uz: { q: 'Maydoni bo\'yicha eng katta davlat?', o: ['Rossiya','Kanada','Xitoy','AQSh'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самая большая пустыня в мире?', o: ['Сахара','Аравийская','Гоби','Калахари'], c:0 },
-                en: { q: 'The largest desert in the world?', o: ['Sahara','Arabian','Gobi','Kalahari'], c:0 },
-                be: { q: 'Самая вялікая пустыня ў свеце?', o: ['Сахара','Аравійская','Гобі','Калахары'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен шөл?', o: ['Сахара','Арабия','Гоби','Калахари'], c:0 },
-                uz: { q: 'Dunyodagi eng katta cho\'l?', o: ['Saxara','Arabiston','Gobi','Kalahari'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица Франции?', o: ['Лондон','Париж','Берлин','Мадрид'], c:1 },
-                en: { q: 'Capital of France?', o: ['London','Paris','Berlin','Madrid'], c:1 },
-                be: { q: 'Сталіца Францыі?', o: ['Лондан','Парыж','Берлін','Мадрыд'], c:1 },
-                kk: { q: 'Франция астанасы?', o: ['Лондон','Париж','Берлин','Мадрид'], c:1 },
-                uz: { q: 'Fransiya poytaxti?', o: ['London','Parij','Berlin','Madrid'], c:1 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самая глубокая точка Мирового океана?', o: ['Марианская впадина','Пуэрто-Рико','Сандвичева','Курило-Камчатская'], c:0 },
-                en: { q: 'The deepest point in the ocean?', o: ['Mariana Trench','Puerto Rico','Sandwich','Kuril-Kamchatka'], c:0 },
-                be: { q: 'Самая глыбокая кропка Сусветнага акіяна?', o: ['Марыянская ўпадзіна','Пуэрта-Рыка','Сандвічава','Курыла-Камчацкая'], c:0 },
-                kk: { q: 'Əлем мұхитының ең терең нүктесі?', o: ['Мариан шұңғымасы','Пуэрто-Рико','Сэндвич','Курил-Камчатка'], c:0 },
-                uz: { q: 'Jahon okeanining eng chuqur nuqtasi?', o: ['Marian o\'pirilishi','Puerto-Riko','Sandvich','Kuril-Kamchatka'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Где находится пирамида Хеопса?', o: ['Египет','Мексика','Ирак','Иран'], c:0 },
-                en: { q: 'Where is the Pyramid of Cheops?', o: ['Egypt','Mexico','Iraq','Iran'], c:0 },
-                be: { q: 'Дзе знаходзіцца піраміда Хеопса?', o: ['Егіпет','Мексіка','Ірак','Іран'], c:0 },
-                kk: { q: 'Хеопс пирамидасы қай жерде?', o: ['Мысыр','Мексика','Ирак','Иран'], c:0 },
-                uz: { q: 'Xeops piramidasi qayerda?', o: ['Misr','Meksika','Iroq','Eron'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самый крупный остров в мире?', o: ['Гренландия','Новая Гвинея','Борнео','Мадагаскар'], c:0 },
-                en: { q: 'The largest island in the world?', o: ['Greenland','New Guinea','Borneo','Madagascar'], c:0 },
-                be: { q: 'Самы буйны востраў у свеце?', o: ['Грэнландыя','Новая Гвінея','Барнеа','Мадагаскар'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен арал?', o: ['Гренландия','Жаңа Гвинея','Борнео','Мадагаскар'], c:0 },
-                uz: { q: 'Dunyodagi eng katta orol?', o: ['Grenlandiya','Yangi Gvineya','Borneo','Madagaskar'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица Японии?', o: ['Сеул','Пекин','Токио','Бангкок'], c:2 },
-                en: { q: 'Capital of Japan?', o: ['Seoul','Beijing','Tokyo','Bangkok'], c:2 },
-                be: { q: 'Сталіца Японіі?', o: ['Сеул','Пекін','Токіа','Бангкок'], c:2 },
-                kk: { q: 'Жапония астанасы?', o: ['Сеул','Пекин','Токио','Бангкок'], c:2 },
-                uz: { q: 'Yaponiya poytaxti?', o: ['Seul','Pekin','Tokio','Bangkok'], c:2 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Какая страна имеет самое большое население?', o: ['Индия','Китай','США','Индонезия'], c:0 },
-                en: { q: 'Which country has the largest population?', o: ['India','China','USA','Indonesia'], c:0 },
-                be: { q: 'Якая краіна мае самае вялікае насельніцтва?', o: ['Індыя','Кітай','ЗША','Інданезія'], c:0 },
-                kk: { q: 'Қай елде халық саны ең көп?', o: ['Үндістан','Қытай','АҚШ','Индонезия'], c:0 },
-                uz: { q: 'Qaysi davlat aholisi eng ko\'p?', o: ['Hindiston','Xitoy','AQSh','Indoneziya'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Где находится Великая Китайская стена?', o: ['Китай','Япония','Корея','Вьетнам'], c:0 },
-                en: { q: 'Where is the Great Wall of China?', o: ['China','Japan','Korea','Vietnam'], c:0 },
-                be: { q: 'Дзе знаходзіцца Вялікая Кітайская сцяна?', o: ['Кітай','Японія','Карэя','В\'етнам'], c:0 },
-                kk: { q: 'Ұлы Қытай қорғаны қай жерде?', o: ['Қытай','Жапония','Корея','Вьетнам'], c:0 },
-                uz: { q: 'Buyuk Xitoy devori qayerda?', o: ['Xitoy','Yaponiya','Koreya','Vyetnam'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самая южная точка Земли?', o: ['Южный полюс','Огненная Земля','Мыс Горн','Кейптаун'], c:0 },
-                en: { q: 'The southernmost point of Earth?', o: ['South Pole','Tierra del Fuego','Cape Horn','Cape Town'], c:0 },
-                be: { q: 'Самая паўднёвая кропка Зямлі?', o: ['Паўднёвы полюс','Агняная Зямля','Мыс Горн','Кейптаўн'], c:0 },
-                kk: { q: 'Жердің ең оңтүстік нүктесі?', o: ['Оңтүстік полюс','Отты Жер','Горн мүйісі','Кейптаун'], c:0 },
-                uz: { q: 'Yerning eng janubiy nuqtasi?', o: ['Janubiy qutb','Olovli Yer','Gorn burni','Keyptaun'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица Канады?', o: ['Торонто','Монреаль','Оттава','Ванкувер'], c:2 },
-                en: { q: 'Capital of Canada?', o: ['Toronto','Montreal','Ottawa','Vancouver'], c:2 },
-                be: { q: 'Сталіца Канады?', o: ['Таронта','Манрэаль','Атава','Ванкувер'], c:2 },
-                kk: { q: 'Канада астанасы?', o: ['Торонто','Монреаль','Оттава','Ванкувер'], c:2 },
-                uz: { q: 'Kanada poytaxti?', o: ['Toronto','Montreal','Ottava','Vankuver'], c:2 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Какая река протекает через Париж?', o: ['Сена','Рейн','Дунай','Темза'], c:0 },
-                en: { q: 'Which river flows through Paris?', o: ['Seine','Rhine','Danube','Thames'], c:0 },
-                be: { q: 'Якая рака працякае праз Парыж?', o: ['Сена','Рэйн','Дунай','Тэмза'], c:0 },
-                kk: { q: 'Париж арқылы қандай өзен ағады?', o: ['Сена','Рейн','Дунай','Темза'], c:0 },
-                uz: { q: 'Parij orqali qaysi daryo oqadi?', o: ['Sena','Reyn','Dunay','Temza'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Где находится Статуя Свободы?', o: ['Вашингтон','Нью-Йорк','Бостон','Филадельфия'], c:1 },
-                en: { q: 'Where is the Statue of Liberty?', o: ['Washington','New York','Boston','Philadelphia'], c:1 },
-                be: { q: 'Дзе знаходзіцца Статуя Свабоды?', o: ['Вашынгтон','Нью-Ёрк','Бостан','Філадэльфія'], c:1 },
-                kk: { q: 'Азаттық мүсіні қай жерде?', o: ['Вашингтон','Нью-Йорк','Бостон','Филадельфия'], c:1 },
-                uz: { q: 'Ozodlik haykali qayerda?', o: ['Vashington','Nyu-York','Boston','Filadelfiya'], c:1 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самый высокий водопад в мире?', o: ['Ниагарский','Виктория','Анхель','Игуасу'], c:2 },
-                en: { q: 'The highest waterfall in the world?', o: ['Niagara','Victoria','Angel','Iguazu'], c:2 },
-                be: { q: 'Самы высокі вадаспад у свеце?', o: ['Ніягарскі','Вікторыя','Анхель','Ігуасу'], c:2 },
-                kk: { q: 'Əлемдегі ең биік сарқырама?', o: ['Ниагара','Виктория','Анхель','Игуасу'], c:2 },
-                uz: { q: 'Dunyodagi eng baland sharshara?', o: ['Niagara','Viktoriya','Anxel','Iguasu'], c:2 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица Австралии?', o: ['Сидней','Мельбурн','Канберра','Брисбен'], c:2 },
-                en: { q: 'Capital of Australia?', o: ['Sydney','Melbourne','Canberra','Brisbane'], c:2 },
-                be: { q: 'Сталіца Аўстраліі?', o: ['Сідней','Мельбурн','Канбера','Брысбен'], c:2 },
-                kk: { q: 'Австралия астанасы?', o: ['Сидней','Мельбурн','Канберра','Брисбен'], c:2 },
-                uz: { q: 'Avstraliya poytaxti?', o: ['Sidney','Melburn','Kanberra','Brisben'], c:2 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Какое море омывает Санкт-Петербург?', o: ['Балтийское','Черное','Каспийское','Белое'], c:0 },
-                en: { q: 'Which sea washes Saint Petersburg?', o: ['Baltic','Black','Caspian','White'], c:0 },
-                be: { q: 'Якое мора абмывае Санкт-Пецярбург?', o: ['Балтыйскае','Чорнае','Каспійскае','Белае'], c:0 },
-                kk: { q: 'Санкт-Петербургті қандай теңіз шайып жатыр?', o: ['Балтық','Қара','Каспий','Ақ'], c:0 },
-                uz: { q: 'Sankt-Peterburgni qaysi dengiz yuvadi?', o: ['Boltiq','Qora','Kaspiy','Oq'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Где находится Тадж-Махал?', o: ['Индия','Пакистан','Бангладеш','Непал'], c:0 },
-                en: { q: 'Where is the Taj Mahal?', o: ['India','Pakistan','Bangladesh','Nepal'], c:0 },
-                be: { q: 'Дзе знаходзіцца Тадж-Махал?', o: ['Індыя','Пакістан','Бангладэш','Непал'], c:0 },
-                kk: { q: 'Тәж-Махал қай жерде?', o: ['Үндістан','Пәкістан','Бангладеш','Непал'], c:0 },
-                uz: { q: 'Taj-Mahal qayerda?', o: ['Hindiston','Pokiston','Bangladesh','Nepal'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Самый жаркий материк?', o: ['Африка','Азия','Австралия','Южная Америка'], c:0 },
-                en: { q: 'The hottest continent?', o: ['Africa','Asia','Australia','South America'], c:0 },
-                be: { q: 'Самы гарачы мацярык?', o: ['Афрыка','Азія','Аўстралія','Паўднёвая Амерыка'], c:0 },
-                kk: { q: 'Ең ыстық құрлық?', o: ['Африка','Азия','Австралия','Оңтүстік Америка'], c:0 },
-                uz: { q: 'Eng issiq qit\'a?', o: ['Afrika','Osiyo','Avstraliya','Janubiy Amerika'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица Бразилии?', o: ['Рио-де-Жанейро','Сан-Паулу','Бразилиа','Сальвадор'], c:2 },
-                en: { q: 'Capital of Brazil?', o: ['Rio de Janeiro','Sao Paulo','Brasilia','Salvador'], c:2 },
-                be: { q: 'Сталіца Бразіліі?', o: ['Рыа-дэ-Жанэйра','Сан-Паўлу','Бразіліа','Сальвадор'], c:2 },
-                kk: { q: 'Бразилия астанасы?', o: ['Рио-де-Жанейро','Сан-Паулу','Бразилиа','Сальвадор'], c:2 },
-                uz: { q: 'Braziliya poytaxti?', o: ['Rio-de-Janeyro','San-Paulu','Braziliya','Salvador'], c:2 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Какое озеро самое глубокое в мире?', o: ['Байкал','Танганьика','Каспийское','Верхнее'], c:0 },
-                en: { q: 'Which lake is the deepest in the world?', o: ['Baikal','Tanganyika','Caspian','Superior'], c:0 },
-                be: { q: 'Якое возера самае глыбокае ў свеце?', o: ['Байкал','Танганьіка','Каспійскае','Верхняе'], c:0 },
-                kk: { q: 'Əлемдегі ең терең көл?', o: ['Байкал','Танганьика','Каспий','Жоғарғы'], c:0 },
-                uz: { q: 'Dunyodagi eng chuqur ko\'l?', o: ['Baykal','Tanganika','Kaspiy','Yuqori'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Где находится Кремль?', o: ['Москва','Казань','Новгород','Владимир'], c:0 },
-                en: { q: 'Where is the Kremlin?', o: ['Moscow','Kazan','Novgorod','Vladimir'], c:0 },
-                be: { q: 'Дзе знаходзіцца Крэмль?', o: ['Масква','Казань','Ноўгарад','Уладзімір'], c:0 },
-                kk: { q: 'Кремль қай жерде?', o: ['Мәскеу','Қазан','Новгород','Владимир'], c:0 },
-                uz: { q: 'Kreml qayerda?', o: ['Moskva','Qozon','Novgorod','Vladimir'], c:0 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Какой пролив разделяет Азию и Америку?', o: ['Гибралтарский','Берингов','Магелланов','Ла-Манш'], c:1 },
-                en: { q: 'Which strait separates Asia and America?', o: ['Gibraltar','Bering','Magellan','English Channel'], c:1 },
-                be: { q: 'Які праліў падзяляе Азію і Амерыку?', o: ['Гібралтарскі','Берынг','Магеланаў','Ла-Манш'], c:1 },
-                kk: { q: 'Азия мен Американы қай бұғаз бөліп тұр?', o: ['Гибралтар','Беринг','Магеллан','Ла-Манш'], c:1 },
-                uz: { q: 'Osiyo va Amerikani qaysi bo\'g\'oz ajratadi?', o: ['Gibraltar','Bering','Magellan','La-Mansh'], c:1 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Столица Италии?', o: ['Милан','Венеция','Рим','Неаполь'], c:2 },
-                en: { q: 'Capital of Italy?', o: ['Milan','Venice','Rome','Naples'], c:2 },
-                be: { q: 'Сталіца Італіі?', o: ['Мілан','Венецыя','Рым','Неапаль'], c:2 },
-                kk: { q: 'Италия астанасы?', o: ['Милан','Венеция','Рим','Неаполь'], c:2 },
-                uz: { q: 'Italiya poytaxti?', o: ['Milan','Venetsiya','Rim','Neapol'], c:2 }
-            },
-            {
-                category: '🌍 География',
-                ru: { q: 'Какая страна занимает целый континент?', o: ['Австралия','США','Канада','Бразилия'], c:0 },
-                en: { q: 'Which country occupies an entire continent?', o: ['Australia','USA','Canada','Brazil'], c:0 },
-                be: { q: 'Якая краіна займае цэлы кантынент?', o: ['Аўстралія','ЗША','Канада','Бразілія'], c:0 },
-                kk: { q: 'Қай ел тұтас құрлықты алып жатыр?', o: ['Австралия','АҚШ','Канада','Бразилия'], c:0 },
-                uz: { q: 'Qaysi davlat butun qit\'ani egallaydi?', o: ['Avstraliya','AQSh','Kanada','Braziliya'], c:0 }
-            },
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resize);
+            resize();
 
-            // ===== 2. ЖИВОТНЫЕ (30) =====
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное самое быстрое на суше?', o: ['Гепард','Лев','Страус','Лошадь'], c:0 },
-                en: { q: 'Which animal is the fastest on land?', o: ['Cheetah','Lion','Ostrich','Horse'], c:0 },
-                be: { q: 'Якое жывёла самае хуткае на сушы?', o: ['Гепард','Леў','Страус','Конь'], c:0 },
-                kk: { q: 'Қандай жануар құрлықта ең жылдам?', o: ['Гепард','Арыстан','Түйеқұс','Жылқы'], c:0 },
-                uz: { q: 'Qaysi hayvon quruqlikda eng tez?', o: ['Gepard','Arslon','Tuyaqush','Ot'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самое большое животное в мире?', o: ['Синий кит','Слон','Кашалот','Белый медведь'], c:0 },
-                en: { q: 'The largest animal in the world?', o: ['Blue whale','Elephant','Sperm whale','Polar bear'], c:0 },
-                be: { q: 'Самае вялікае жывёла ў свеце?', o: ['Сіні кіт','Слон','Кашалот','Белы мядзведзь'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен жануар?', o: ['Көк кит','Піл','Кашалот','Ақ аю'], c:0 },
-                uz: { q: 'Dunyodagi eng katta hayvon?', o: ['Ko\'k kit','Fil','Kashalot','Oq ayiq'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самое высокое животное?', o: ['Жираф','Слон','Верблюд','Лось'], c:0 },
-                en: { q: 'The tallest animal?', o: ['Giraffe','Elephant','Camel','Elk'], c:0 },
-                be: { q: 'Самае высокае жывёла?', o: ['Жырафа','Слон','Вярблюд','Лось'], c:0 },
-                kk: { q: 'Ең биік жануар?', o: ['Керік','Піл','Түйе','Бұғы'], c:0 },
-                uz: { q: 'Eng baland hayvon?', o: ['Jirafa','Fil','Tuya','Mush'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Сколько ног у паука?', o: ['6','8','10','12'], c:1 },
-                en: { q: 'How many legs does a spider have?', o: ['6','8','10','12'], c:1 },
-                be: { q: 'Колькі ног у павука?', o: ['6','8','10','12'], c:1 },
-                kk: { q: 'Өрмекшінің неше аяғы бар?', o: ['6','8','10','12'], c:1 },
-                uz: { q: 'O\'rgimchakning necha oyog\'i bor?', o: ['6','8','10','12'], c:1 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное является символом Китая?', o: ['Панда','Дракон','Тигр','Слон'], c:0 },
-                en: { q: 'Which animal is the symbol of China?', o: ['Panda','Dragon','Tiger','Elephant'], c:0 },
-                be: { q: 'Якое жывёла з\'яўляецца сімвалам Кітая?', o: ['Панда','Дракон','Тыгр','Слон'], c:0 },
-                kk: { q: 'Қай жануар Қытайдың символы?', o: ['Панда','Айдаһар','Жолбарыс','Піл'], c:0 },
-                uz: { q: 'Qaysi hayvon Xitoyning ramzi?', o: ['Panda','Ajdaho','Yo\'lbars','Fil'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самая большая птица в мире?', o: ['Страус','Пингвин','Орел','Альбатрос'], c:0 },
-                en: { q: 'The largest bird in the world?', o: ['Ostrich','Penguin','Eagle','Albatross'], c:0 },
-                be: { q: 'Самая вялікая птушка ў свеце?', o: ['Страус','Пінгвін','Арол','Альбатрос'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен құс?', o: ['Түйеқұс','Пингвин','Бүркіт','Альбатрос'], c:0 },
-                uz: { q: 'Dunyodagi eng katta qush?', o: ['Tuyaqush','Pingvin','Burgut','Albatros'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное может менять цвет?', o: ['Хамелеон','Змея','Ящерица','Осьминог'], c:0 },
-                en: { q: 'Which animal can change color?', o: ['Chameleon','Snake','Lizard','Octopus'], c:0 },
-                be: { q: 'Якое жывёла можа мяняць колер?', o: ['Хамелеон','Змяя','Яшчарка','Васьміног'], c:0 },
-                kk: { q: 'Қай жануар түсін өзгерте алады?', o: ['Хамелеон','Жылан','Кесіртке','Сегізаяқ'], c:0 },
-                uz: { q: 'Qaysi hayvon rangini o\'zgartira oladi?', o: ['Xameleon','Ilon','Kaltakesak','Sakkizoyoq'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Сколько зубов у взрослой акулы?', o: ['200','300','400','500'], c:1 },
-                en: { q: 'How many teeth does an adult shark have?', o: ['200','300','400','500'], c:1 },
-                be: { q: 'Колькі зубоў у дарослай акулы?', o: ['200','300','400','500'], c:1 },
-                kk: { q: 'Ересек акуланың неше тісі бар?', o: ['200','300','400','500'], c:1 },
-                uz: { q: 'Voyaga yetgan akulaning nechta tishi bor?', o: ['200','300','400','500'], c:1 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное спит больше всего?', o: ['Коала','Ленивец','Панда','Лев'], c:0 },
-                en: { q: 'Which animal sleeps the most?', o: ['Koala','Sloth','Panda','Lion'], c:0 },
-                be: { q: 'Якое жывёла спіць больш за ўсё?', o: ['Коала','Ленівец','Панда','Леў'], c:0 },
-                kk: { q: 'Қай жануар ең көп ұйықтайды?', o: ['Коала','Жалқау','Панда','Арыстан'], c:0 },
-                uz: { q: 'Qaysi hayvon eng ko\'p uxlaydi?', o: ['Koala','Dangasa','Panda','Arslon'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самая большая кошка в мире?', o: ['Тигр','Лев','Пума','Ягуар'], c:0 },
-                en: { q: 'The largest cat in the world?', o: ['Tiger','Lion','Cougar','Jaguar'], c:0 },
-                be: { q: 'Самая вялікая котка ў свеце?', o: ['Тыгр','Леў','Пума','Ягуар'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен мысық?', o: ['Жолбарыс','Арыстан','Пума','Ягуар'], c:0 },
-                uz: { q: 'Dunyodagi eng katta mushuk?', o: ['Yo\'lbars','Arslon','Puma','Yaguar'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное имеет самый длинный язык?', o: ['Жираф','Муравьед','Хамелеон','Змея'], c:1 },
-                en: { q: 'Which animal has the longest tongue?', o: ['Giraffe','Anteater','Chameleon','Snake'], c:1 },
-                be: { q: 'Якое жывёла мае самы доўгі язык?', o: ['Жырафа','Мурашкаед','Хамелеон','Змяя'], c:1 },
-                kk: { q: 'Қай жануардың тілі ең ұзын?', o: ['Керік','Құмырсқажегіш','Хамелеон','Жылан'], c:1 },
-                uz: { q: 'Qaysi hayvonning tili eng uzun?', o: ['Jirafa','Chumolixo\'r','Xameleon','Ilon'], c:1 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самый умный из дельфинов?', o: ['Афалина','Косатка','Гринда','Белуха'], c:0 },
-                en: { q: 'The smartest dolphin?', o: ['Bottlenose','Orca','Pilot whale','Beluga'], c:0 },
-                be: { q: 'Самы разумны з дэльфінаў?', o: ['Афаліна','Касатка','Грында','Белуха'], c:0 },
-                kk: { q: 'Дельфиндердің ең ақылдысы?', o: ['Афалина','Қасатқа','Гринда','Белуха'], c:0 },
-                uz: { q: 'Delfinlarning eng aqllisi?', o: ['Afalina','Qasatqa','Grinda','Beluha'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное может летать без крыльев?', o: ['Рыба-летучка','Белка-летяга','Опоссум','Лемур'], c:1 },
-                en: { q: 'Which animal can fly without wings?', o: ['Flying fish','Flying squirrel','Possum','Lemur'], c:1 },
-                be: { q: 'Якое жывёла можа лятаць без крылаў?', o: ['Рыба-лятучка','Вавёрка-лятуха','Апосум','Лемур'], c:1 },
-                kk: { q: 'Қай жануар қанатсыз ұша алады?', o: ['Ұшатын балық','Ұшатын тиін','Опосум','Лемур'], c:1 },
-                uz: { q: 'Qaysi hayvon qanotsiz ucha oladi?', o: ['Uchar baliq','Uchar sincap','Opossum','Lemur'], c:1 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самая ядовитая змея?', o: ['Тайпан','Кобра','Гремучая','Мамба'], c:0 },
-                en: { q: 'The most venomous snake?', o: ['Taipan','Cobra','Rattlesnake','Mamba'], c:0 },
-                be: { q: 'Самая атрутная змяя?', o: ['Тайпан','Кобра','Грымучая','Мамба'], c:0 },
-                kk: { q: 'Ең улы жылан?', o: ['Тайпан','Кобра','Сонар жылан','Мамба'], c:0 },
-                uz: { q: 'Eng zaharli ilon?', o: ['Taypan','Kobra','Shovqin ilon','Mamba'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное живет дольше всех?', o: ['Черепаха','Слон','Кит','Орел'], c:0 },
-                en: { q: 'Which animal lives the longest?', o: ['Turtle','Elephant','Whale','Eagle'], c:0 },
-                be: { q: 'Якое жывёла жыве даўжэй за ўсіх?', o: ['Чарапаха','Слон','Кіт','Арол'], c:0 },
-                kk: { q: 'Қай жануар ең ұзақ өмір сүреді?', o: ['Тасабақа','Піл','Кит','Бүркіт'], c:0 },
-                uz: { q: 'Qaysi hayvon eng uzoq yashaydi?', o: ['Toshbaqa','Fil','Kit','Burgut'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Сколько сердце у осьминога?', o: ['1','2','3','4'], c:2 },
-                en: { q: 'How many hearts does an octopus have?', o: ['1','2','3','4'], c:2 },
-                be: { q: 'Колькі сэрцаў у васьмінога?', o: ['1','2','3','4'], c:2 },
-                kk: { q: 'Сегізаяқтың неше жүрегі бар?', o: ['1','2','3','4'], c:2 },
-                uz: { q: 'Sakkizoyoqning necha yuragi bor?', o: ['1','2','3','4'], c:2 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное не пьет воду?', o: ['Коала','Кенгуру','Тушканчик','Верблюд'], c:0 },
-                en: { q: 'Which animal does not drink water?', o: ['Koala','Kangaroo','Jerboa','Camel'], c:0 },
-                be: { q: 'Якое жывёла не п\'е ваду?', o: ['Коала','Кенгуру','Тушканчык','Вярблюд'], c:0 },
-                kk: { q: 'Қай жануар су ішпейді?', o: ['Коала','Кенгуру','Қосаяқ','Түйе'], c:0 },
-                uz: { q: 'Qaysi hayvon suv ichmaydi?', o: ['Koala','Kenguru','Qo\'shoyoq','Tuya'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самая маленькая птица в мире?', o: ['Колибри','Королек','Синица','Воробей'], c:0 },
-                en: { q: 'The smallest bird in the world?', o: ['Hummingbird','Goldcrest','Tit','Sparrow'], c:0 },
-                be: { q: 'Самая маленькая птушка ў свеце?', o: ['Калібры','Каралёк','Сініца','Верабей'], c:0 },
-                kk: { q: 'Əлемдегі ең кіші құс?', o: ['Колибри','Королек','Шымшық','Торғай'], c:0 },
-                uz: { q: 'Dunyodagi eng kichik qush?', o: ['Kolibri','Qorolik','Chittak','Chumchuq'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное имеет самый большой мозг?', o: ['Кашалот','Слон','Дельфин','Человек'], c:0 },
-                en: { q: 'Which animal has the largest brain?', o: ['Sperm whale','Elephant','Dolphin','Human'], c:0 },
-                be: { q: 'Якое жывёла мае самы вялікі мозг?', o: ['Кашалот','Слон','Дэльфін','Чалавек'], c:0 },
-                kk: { q: 'Қай жануардың миы ең үлкен?', o: ['Кашалот','Піл','Дельфин','Адам'], c:0 },
-                uz: { q: 'Qaysi hayvonning miyasi eng katta?', o: ['Kashalot','Fil','Delfin','Inson'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Сколько глаз у пчелы?', o: ['2','3','5','7'], c:2 },
-                en: { q: 'How many eyes does a bee have?', o: ['2','3','5','7'], c:2 },
-                be: { q: 'Колькі вачэй у пчалы?', o: ['2','3','5','7'], c:2 },
-                kk: { q: 'Араның неше көзі бар?', o: ['2','3','5','7'], c:2 },
-                uz: { q: 'Asalarining necha ko\'zi bor?', o: ['2','3','5','7'], c:2 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное может регенерировать хвост?', o: ['Ящерица','Змея','Хамелеон','Крокодил'], c:0 },
-                en: { q: 'Which animal can regenerate its tail?', o: ['Lizard','Snake','Chameleon','Crocodile'], c:0 },
-                be: { q: 'Якое жывёла можа рэгенераваць хвост?', o: ['Яшчарка','Змяя','Хамелеон','Кракадзіл'], c:0 },
-                kk: { q: 'Қай жануар құйрығын қалпына келтіре алады?', o: ['Кесіртке','Жылан','Хамелеон','Қолтырауын'], c:0 },
-                uz: { q: 'Qaysi hayvon dumini qayta tiklay oladi?', o: ['Kaltakesak','Ilon','Xameleon','Timsoh'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самое тяжелое наземное животное?', o: ['Слон','Бегемот','Носорог','Буйвол'], c:0 },
-                en: { q: 'The heaviest land animal?', o: ['Elephant','Hippopotamus','Rhinoceros','Buffalo'], c:0 },
-                be: { q: 'Самае цяжкае наземнае жывёла?', o: ['Слон','Бегемот','Насарог','Буйвал'], c:0 },
-                kk: { q: 'Ең ауыр құрлық жануары?', o: ['Піл','Бегемот','Мүйізтұмсық','Буйвол'], c:0 },
-                uz: { q: 'Eng og\'ir quruqlik hayvoni?', o: ['Fil','Begemot','Karkidon','Buyvol'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное может стоять на голове?', o: ['Ленивец','Коала','Опоссум','Лемур'], c:0 },
-                en: { q: 'Which animal can stand on its head?', o: ['Sloth','Koala','Possum','Lemur'], c:0 },
-                be: { q: 'Якое жывёла можа стаяць на галаве?', o: ['Ленівец','Коала','Апосум','Лемур'], c:0 },
-                kk: { q: 'Қай жануар басымен тұра алады?', o: ['Жалқау','Коала','Опосум','Лемур'], c:0 },
-                uz: { q: 'Qaysi hayvon boshida tura oladi?', o: ['Dangasa','Koala','Opossum','Lemur'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Сколько костей у жирафа в шее?', o: ['5','6','7','8'], c:2 },
-                en: { q: 'How many bones in a giraffe neck?', o: ['5','6','7','8'], c:2 },
-                be: { q: 'Колькі костак у жырафы ў шыі?', o: ['5','6','7','8'], c:2 },
-                kk: { q: 'Керіктің мойнында неше сүйек бар?', o: ['5','6','7','8'], c:2 },
-                uz: { q: 'Jirafaning bo\'ynida nechta suyak bor?', o: ['5','6','7','8'], c:2 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное самое социальное?', o: ['Муравей','Пчела','Дельфин','Слон'], c:0 },
-                en: { q: 'Which animal is the most social?', o: ['Ant','Bee','Dolphin','Elephant'], c:0 },
-                be: { q: 'Якое жывёла самае сацыяльнае?', o: ['Мурашка','Пчала','Дэльфін','Слон'], c:0 },
-                kk: { q: 'Қай жануар ең әлеуметтік?', o: ['Құмырсқа','Ара','Дельфин','Піл'], c:0 },
-                uz: { q: 'Qaysi hayvon eng ijtimoiy?', o: ['Chumoli','Asalari','Delfin','Fil'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самая быстрая птица в пикировании?', o: ['Сокол-сапсан','Орел','Ястреб','Стриж'], c:0 },
-                en: { q: 'The fastest bird in a dive?', o: ['Peregrine falcon','Eagle','Hawk','Swift'], c:0 },
-                be: { q: 'Самая хуткая птушка ў пікіраванні?', o: ['Сокал-сапсан','Арол','Ястраб','Стрыж'], c:0 },
-                kk: { q: 'Ең жылдам сұңқар?', o: ['Сұңқар-сапсан','Бүркіт','Қаршыға','Қарақұс'], c:0 },
-                uz: { q: 'Eng tez sho\'ng\'uvchi qush?', o: ['Lochin-sapsan','Burgut','Qirg\'iy','Qorakush'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное имеет броню?', o: ['Броненосец','Черепаха','Динозавр','Крокодил'], c:0 },
-                en: { q: 'Which animal has armor?', o: ['Armadillo','Turtle','Dinosaur','Crocodile'], c:0 },
-                be: { q: 'Якое жывёла мае браня?', o: ['Браненосец','Чарапаха','Дыназаўр','Кракадзіл'], c:0 },
-                kk: { q: 'Қай жануардың сауыты бар?', o: ['Сауытты','Тасабақа','Динозавр','Қолтырауын'], c:0 },
-                uz: { q: 'Qaysi hayvonning zirhi bor?', o: ['Zirhli','Toshbaqa','Dinozavr','Timsoh'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Самый большой грызун в мире?', o: ['Капибара','Бобр','Сурок','Барабанщик'], c:0 },
-                en: { q: 'The largest rodent in the world?', o: ['Capybara','Beaver','Marmot','Drummer'], c:0 },
-                be: { q: 'Самы вялікі грызун у свеце?', o: ['Капібара','Бабёр','Сурок','Барабаншчык'], c:0 },
-                kk: { q: 'Əлемдегі ең үлкен кеміргіш?', o: ['Капибара','Құндыз','Сурок','Барабаншы'], c:0 },
-                uz: { q: 'Dunyodagi eng katta kemiruvchi?', o: ['Kapibara','Qunduz','Suvor','Barabanchi'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Какое животное имеет самый длинный нос?', o: ['Слон','Тапир','Морж','Тюлень'], c:0 },
-                en: { q: 'Which animal has the longest nose?', o: ['Elephant','Tapir','Walrus','Seal'], c:0 },
-                be: { q: 'Якое жывёла мае самы доўгі нос?', o: ['Слон','Тапір','Морж','Цюлень'], c:0 },
-                kk: { q: 'Қай жануардың мұрны ең ұзын?', o: ['Піл','Тапир','Морж','Тюлень'], c:0 },
-                uz: { q: 'Qaysi hayvonning burni eng uzun?', o: ['Fil','Tapir','Morj','Tyulen'], c:0 }
-            },
-            {
-                category: '🐾 Животные',
-                ru: { q: 'Сколько у пингвина крыльев?', o: ['0','1','2','3'], c:2 },
-                en: { q: 'How many wings does a penguin have?', o: ['0','1','2','3'], c:2 },
-                be: { q: 'Колькі ў пінгвіна крылаў?', o: ['0','1','2','3'], c:2 },
-                kk: { q: 'Пингвиннің қанаты неше?', o: ['0','1','2','3'], c:2 },
-                uz: { q: 'Pingvinning nechta qanoti bor?', o: ['0','1','2','3'], c:2 }
-            },
+            class Ripple {
+                constructor(x, y) {
+                    this.x = x;
+                    this.y = y;
+                    this.radius = 0;
+                    this.maxRadius = Math.max(width, height) * 0.6;
+                    this.speed = 2 + Math.random() * 3;
+                    this.opacity = 0.6;
+                    this.color = `hsla(${190 + Math.random() * 30}, 70%, 70%, `;
+                }
 
-            // ===== 3. МАТЕМАТИКА (30) =====
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 7 × 8?', o: ['48','56','64','72'], c:1 },
-                en: { q: 'What is 7 × 8?', o: ['48','56','64','72'], c:1 },
-                be: { q: 'Колькі будзе 7 × 8?', o: ['48','56','64','72'], c:1 },
-                kk: { q: '7 × 8 неше?', o: ['48','56','64','72'], c:1 },
-                uz: { q: '7 × 8 necha?', o: ['48','56','64','72'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Квадратный корень из 144?', o: ['10','11','12','13'], c:2 },
-                en: { q: 'Square root of 144?', o: ['10','11','12','13'], c:2 },
-                be: { q: 'Квадратны корань з 144?', o: ['10','11','12','13'], c:2 },
-                kk: { q: '144-тің квадрат түбірі?', o: ['10','11','12','13'], c:2 },
-                uz: { q: '144 ning kvadrat ildizi?', o: ['10','11','12','13'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 15 + 27?', o: ['40','42','43','45'], c:1 },
-                en: { q: 'What is 15 + 27?', o: ['40','42','43','45'], c:1 },
-                be: { q: 'Колькі будзе 15 + 27?', o: ['40','42','43','45'], c:1 },
-                kk: { q: '15 + 27 неше?', o: ['40','42','43','45'], c:1 },
-                uz: { q: '15 + 27 necha?', o: ['40','42','43','45'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 100 - 37?', o: ['53','63','73','83'], c:0 },
-                en: { q: 'What is 100 - 37?', o: ['53','63','73','83'], c:0 },
-                be: { q: 'Колькі будзе 100 - 37?', o: ['53','63','73','83'], c:0 },
-                kk: { q: '100 - 37 неше?', o: ['53','63','73','83'], c:0 },
-                uz: { q: '100 - 37 necha?', o: ['53','63','73','83'], c:0 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 12 × 12?', o: ['124','134','144','154'], c:2 },
-                en: { q: 'What is 12 × 12?', o: ['124','134','144','154'], c:2 },
-                be: { q: 'Колькі будзе 12 × 12?', o: ['124','134','144','154'], c:2 },
-                kk: { q: '12 × 12 неше?', o: ['124','134','144','154'], c:2 },
-                uz: { q: '12 × 12 necha?', o: ['124','134','144','154'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 81 ÷ 9?', o: ['7','8','9','10'], c:2 },
-                en: { q: 'What is 81 ÷ 9?', o: ['7','8','9','10'], c:2 },
-                be: { q: 'Колькі будзе 81 ÷ 9?', o: ['7','8','9','10'], c:2 },
-                kk: { q: '81 ÷ 9 неше?', o: ['7','8','9','10'], c:2 },
-                uz: { q: '81 ÷ 9 necha?', o: ['7','8','9','10'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 25 + 18 + 7?', o: ['48','50','52','54'], c:1 },
-                en: { q: 'What is 25 + 18 + 7?', o: ['48','50','52','54'], c:1 },
-                be: { q: 'Колькі будзе 25 + 18 + 7?', o: ['48','50','52','54'], c:1 },
-                kk: { q: '25 + 18 + 7 неше?', o: ['48','50','52','54'], c:1 },
-                uz: { q: '25 + 18 + 7 necha?', o: ['48','50','52','54'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 40 - 28?', o: ['10','12','14','16'], c:1 },
-                en: { q: 'What is 40 - 28?', o: ['10','12','14','16'], c:1 },
-                be: { q: 'Колькі будзе 40 - 28?', o: ['10','12','14','16'], c:1 },
-                kk: { q: '40 - 28 неше?', o: ['10','12','14','16'], c:1 },
-                uz: { q: '40 - 28 necha?', o: ['10','12','14','16'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 6 × 7 + 8?', o: ['48','50','52','54'], c:1 },
-                en: { q: 'What is 6 × 7 + 8?', o: ['48','50','52','54'], c:1 },
-                be: { q: 'Колькі будзе 6 × 7 + 8?', o: ['48','50','52','54'], c:1 },
-                kk: { q: '6 × 7 + 8 неше?', o: ['48','50','52','54'], c:1 },
-                uz: { q: '6 × 7 + 8 necha?', o: ['48','50','52','54'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 90 - 45?', o: ['35','40','45','50'], c:2 },
-                en: { q: 'What is 90 - 45?', o: ['35','40','45','50'], c:2 },
-                be: { q: 'Колькі будзе 90 - 45?', o: ['35','40','45','50'], c:2 },
-                kk: { q: '90 - 45 неше?', o: ['35','40','45','50'], c:2 },
-                uz: { q: '90 - 45 necha?', o: ['35','40','45','50'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 11 × 11?', o: ['111','121','131','141'], c:1 },
-                en: { q: 'What is 11 × 11?', o: ['111','121','131','141'], c:1 },
-                be: { q: 'Колькі будзе 11 × 11?', o: ['111','121','131','141'], c:1 },
-                kk: { q: '11 × 11 неше?', o: ['111','121','131','141'], c:1 },
-                uz: { q: '11 × 11 necha?', o: ['111','121','131','141'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 56 + 34?', o: ['80','90','100','110'], c:1 },
-                en: { q: 'What is 56 + 34?', o: ['80','90','100','110'], c:1 },
-                be: { q: 'Колькі будзе 56 + 34?', o: ['80','90','100','110'], c:1 },
-                kk: { q: '56 + 34 неше?', o: ['80','90','100','110'], c:1 },
-                uz: { q: '56 + 34 necha?', o: ['80','90','100','110'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 144 ÷ 12?', o: ['10','11','12','13'], c:2 },
-                en: { q: 'What is 144 ÷ 12?', o: ['10','11','12','13'], c:2 },
-                be: { q: 'Колькі будзе 144 ÷ 12?', o: ['10','11','12','13'], c:2 },
-                kk: { q: '144 ÷ 12 неше?', o: ['10','11','12','13'], c:2 },
-                uz: { q: '144 ÷ 12 necha?', o: ['10','11','12','13'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 8 × 8 - 16?', o: ['48','56','64','72'], c:0 },
-                en: { q: 'What is 8 × 8 - 16?', o: ['48','56','64','72'], c:0 },
-                be: { q: 'Колькі будзе 8 × 8 - 16?', o: ['48','56','64','72'], c:0 },
-                kk: { q: '8 × 8 - 16 неше?', o: ['48','56','64','72'], c:0 },
-                uz: { q: '8 × 8 - 16 necha?', o: ['48','56','64','72'], c:0 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 75 - 38?', o: ['35','37','39','41'], c:1 },
-                en: { q: 'What is 75 - 38?', o: ['35','37','39','41'], c:1 },
-                be: { q: 'Колькі будзе 75 - 38?', o: ['35','37','39','41'], c:1 },
-                kk: { q: '75 - 38 неше?', o: ['35','37','39','41'], c:1 },
-                uz: { q: '75 - 38 necha?', o: ['35','37','39','41'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 5 × 5 × 5?', o: ['25','75','100','125'], c:3 },
-                en: { q: 'What is 5 × 5 × 5?', o: ['25','75','100','125'], c:3 },
-                be: { q: 'Колькі будзе 5 × 5 × 5?', o: ['25','75','100','125'], c:3 },
-                kk: { q: '5 × 5 × 5 неше?', o: ['25','75','100','125'], c:3 },
-                uz: { q: '5 × 5 × 5 necha?', o: ['25','75','100','125'], c:3 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 180 - 95?', o: ['80','85','90','95'], c:1 },
-                en: { q: 'What is 180 - 95?', o: ['80','85','90','95'], c:1 },
-                be: { q: 'Колькі будзе 180 - 95?', o: ['80','85','90','95'], c:1 },
-                kk: { q: '180 - 95 неше?', o: ['80','85','90','95'], c:1 },
-                uz: { q: '180 - 95 necha?', o: ['80','85','90','95'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 14 × 5?', o: ['60','65','70','75'], c:2 },
-                en: { q: 'What is 14 × 5?', o: ['60','65','70','75'], c:2 },
-                be: { q: 'Колькі будзе 14 × 5?', o: ['60','65','70','75'], c:2 },
-                kk: { q: '14 × 5 неше?', o: ['60','65','70','75'], c:2 },
-                uz: { q: '14 × 5 necha?', o: ['60','65','70','75'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 99 + 1?', o: ['99','100','101','102'], c:1 },
-                en: { q: 'What is 99 + 1?', o: ['99','100','101','102'], c:1 },
-                be: { q: 'Колькі будзе 99 + 1?', o: ['99','100','101','102'], c:1 },
-                kk: { q: '99 + 1 неше?', o: ['99','100','101','102'], c:1 },
-                uz: { q: '99 + 1 necha?', o: ['99','100','101','102'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 36 ÷ 4?', o: ['6','7','8','9'], c:2 },
-                en: { q: 'What is 36 ÷ 4?', o: ['6','7','8','9'], c:2 },
-                be: { q: 'Колькі будзе 36 ÷ 4?', o: ['6','7','8','9'], c:2 },
-                kk: { q: '36 ÷ 4 неше?', o: ['6','7','8','9'], c:2 },
-                uz: { q: '36 ÷ 4 necha?', o: ['6','7','8','9'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 17 + 24 + 9?', o: ['48','50','52','54'], c:1 },
-                en: { q: 'What is 17 + 24 + 9?', o: ['48','50','52','54'], c:1 },
-                be: { q: 'Колькі будзе 17 + 24 + 9?', o: ['48','50','52','54'], c:1 },
-                kk: { q: '17 + 24 + 9 неше?', o: ['48','50','52','54'], c:1 },
-                uz: { q: '17 + 24 + 9 necha?', o: ['48','50','52','54'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 60 - 27?', o: ['30','33','36','39'], c:1 },
-                en: { q: 'What is 60 - 27?', o: ['30','33','36','39'], c:1 },
-                be: { q: 'Колькі будзе 60 - 27?', o: ['30','33','36','39'], c:1 },
-                kk: { q: '60 - 27 неше?', o: ['30','33','36','39'], c:1 },
-                uz: { q: '60 - 27 necha?', o: ['30','33','36','39'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 9 × 9?', o: ['71','81','91','101'], c:1 },
-                en: { q: 'What is 9 × 9?', o: ['71','81','91','101'], c:1 },
-                be: { q: 'Колькі будзе 9 × 9?', o: ['71','81','91','101'], c:1 },
-                kk: { q: '9 × 9 неше?', o: ['71','81','91','101'], c:1 },
-                uz: { q: '9 × 9 necha?', o: ['71','81','91','101'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 120 - 45?', o: ['65','70','75','80'], c:2 },
-                en: { q: 'What is 120 - 45?', o: ['65','70','75','80'], c:2 },
-                be: { q: 'Колькі будзе 120 - 45?', o: ['65','70','75','80'], c:2 },
-                kk: { q: '120 - 45 неше?', o: ['65','70','75','80'], c:2 },
-                uz: { q: '120 - 45 necha?', o: ['65','70','75','80'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 13 × 7?', o: ['81','91','101','111'], c:1 },
-                en: { q: 'What is 13 × 7?', o: ['81','91','101','111'], c:1 },
-                be: { q: 'Колькі будзе 13 × 7?', o: ['81','91','101','111'], c:1 },
-                kk: { q: '13 × 7 неше?', o: ['81','91','101','111'], c:1 },
-                uz: { q: '13 × 7 necha?', o: ['81','91','101','111'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 1000 - 376?', o: ['524','624','724','824'], c:1 },
-                en: { q: 'What is 1000 - 376?', o: ['524','624','724','824'], c:1 },
-                be: { q: 'Колькі будзе 1000 - 376?', o: ['524','624','724','824'], c:1 },
-                kk: { q: '1000 - 376 неше?', o: ['524','624','724','824'], c:1 },
-                uz: { q: '1000 - 376 necha?', o: ['524','624','724','824'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 8 × 15?', o: ['100','110','120','130'], c:2 },
-                en: { q: 'What is 8 × 15?', o: ['100','110','120','130'], c:2 },
-                be: { q: 'Колькі будзе 8 × 15?', o: ['100','110','120','130'], c:2 },
-                kk: { q: '8 × 15 неше?', o: ['100','110','120','130'], c:2 },
-                uz: { q: '8 × 15 necha?', o: ['100','110','120','130'], c:2 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 88 - 49?', o: ['37','39','41','43'], c:1 },
-                en: { q: 'What is 88 - 49?', o: ['37','39','41','43'], c:1 },
-                be: { q: 'Колькі будзе 88 - 49?', o: ['37','39','41','43'], c:1 },
-                kk: { q: '88 - 49 неше?', o: ['37','39','41','43'], c:1 },
-                uz: { q: '88 - 49 necha?', o: ['37','39','41','43'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 18 × 6?', o: ['98','108','118','128'], c:1 },
-                en: { q: 'What is 18 × 6?', o: ['98','108','118','128'], c:1 },
-                be: { q: 'Колькі будзе 18 × 6?', o: ['98','108','118','128'], c:1 },
-                kk: { q: '18 × 6 неше?', o: ['98','108','118','128'], c:1 },
-                uz: { q: '18 × 6 necha?', o: ['98','108','118','128'], c:1 }
-            },
-            {
-                category: '🔢 Математика',
-                ru: { q: 'Сколько будет 150 + 250?', o: ['350','400','450','500'], c:1 },
-                en: { q: 'What is 150 + 250?', o: ['350','400','450','500'], c:1 },
-                be: { q: 'Колькі будзе 150 + 250?', o: ['350','400','450','500'], c:1 },
-                kk: { q: '150 + 250 неше?', o: ['350','400','450','500'], c:1 },
-                uz: { q: '150 + 250 necha?', o: ['350','400','450','500'], c:1 }
-            },
+                update() {
+                    this.radius += this.speed;
+                    this.opacity = 0.6 * (1 - this.radius / this.maxRadius);
+                    return this.radius < this.maxRadius && this.opacity > 0.01;
+                }
 
-            // ===== 4. НАУКА (30) =====
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой газ мы вдыхаем?', o: ['Кислород','Азот','Водород','Углекислый газ'], c:0 },
-                en: { q: 'Which gas do we inhale?', o: ['Oxygen','Nitrogen','Hydrogen','Carbon dioxide'], c:0 },
-                be: { q: 'Які газ мы ўдыхаем?', o: ['Кісларод','Азот','Вадарод','Вуглякіслы газ'], c:0 },
-                kk: { q: 'Қандай газды жұтамыз?', o: ['Оттек','Азот','Сутегі','Көмірқышқыл газы'], c:0 },
-                uz: { q: 'Qaysi gazni nafas olamiz?', o: ['Kislorod','Azot','Vodorod','Karbonat angidrid'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой элемент самый распространенный во Вселенной?', o: ['Водород','Гелий','Кислород','Углерод'], c:0 },
-                en: { q: 'The most common element in the universe?', o: ['Hydrogen','Helium','Oxygen','Carbon'], c:0 },
-                be: { q: 'Які элемент найбольш распаўсюджаны ў Сусвеце?', o: ['Вадарод','Гелій','Кісларод','Вуглярод'], c:0 },
-                kk: { q: 'Əлемдегі ең көп таралған элемент?', o: ['Сутегі','Гелий','Оттек','Көміртек'], c:0 },
-                uz: { q: 'Koinotdagi eng keng tarqalgan element?', o: ['Vodorod','Geliy','Kislorod','Uglerod'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько костей у взрослого человека?', o: ['206','306','406','506'], c:0 },
-                en: { q: 'How many bones in an adult human?', o: ['206','306','406','506'], c:0 },
-                be: { q: 'Колькі костак у дарослага чалавека?', o: ['206','306','406','506'], c:0 },
-                kk: { q: 'Ересек адамның неше сүйегі бар?', o: ['206','306','406','506'], c:0 },
-                uz: { q: 'Voyaga yetgan odamda nechta suyak bor?', o: ['206','306','406','506'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой металл жидкий при комнатной температуре?', o: ['Ртуть','Железо','Золото','Серебро'], c:0 },
-                en: { q: 'Which metal is liquid at room temperature?', o: ['Mercury','Iron','Gold','Silver'], c:0 },
-                be: { q: 'Які метал вадкі пры пакаёвай тэмпературы?', o: ['Ртуць','Жалеза','Золата','Срэбра'], c:0 },
-                kk: { q: 'Бөлме температурасында қай металл сұйық?', o: ['Сынап','Темір','Алтын','Күміс'], c:0 },
-                uz: { q: 'Xona haroratida qaysi metall suyuq?', o: ['Simob','Temir','Oltin','Kumush'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая планета самая горячая?', o: ['Венера','Меркурий','Марс','Юпитер'], c:0 },
-                en: { q: 'Which planet is the hottest?', o: ['Venus','Mercury','Mars','Jupiter'], c:0 },
-                be: { q: 'Якая планета самая гарачая?', o: ['Венера','Меркурый','Марс','Юпітэр'], c:0 },
-                kk: { q: 'Қай планета ең ыстық?', o: ['Шолпан','Меркурий','Марс','Юпитер'], c:0 },
-                uz: { q: 'Qaysi sayyora eng issiq?', o: ['Venera','Merkuriy','Mars','Yupiter'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько хромосом у человека?', o: ['23','46','92','184'], c:1 },
-                en: { q: 'How many chromosomes do humans have?', o: ['23','46','92','184'], c:1 },
-                be: { q: 'Колькі храмасом у чалавека?', o: ['23','46','92','184'], c:1 },
-                kk: { q: 'Адамда неше хромосома бар?', o: ['23','46','92','184'], c:1 },
-                uz: { q: 'Odamda nechta xromosoma bor?', o: ['23','46','92','184'], c:1 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая скорость света?', o: ['300 000 км/с','150 000 км/с','600 000 км/с','100 000 км/с'], c:0 },
-                en: { q: 'What is the speed of light?', o: ['300,000 km/s','150,000 km/s','600,000 km/s','100,000 km/s'], c:0 },
-                be: { q: 'Якая хуткасць святла?', o: ['300 000 км/с','150 000 км/с','600 000 км/с','100 000 км/с'], c:0 },
-                kk: { q: 'Жарық жылдамдығы қандай?', o: ['300 000 км/с','150 000 км/с','600 000 км/с','100 000 км/с'], c:0 },
-                uz: { q: 'Yorug\'lik tezligi qanday?', o: ['300 000 km/s','150 000 km/s','600 000 km/s','100 000 km/s'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Из чего состоит вода?', o: ['Водород и кислород','Кислород и углерод','Водород и азот','Кислород и азот'], c:0 },
-                en: { q: 'What is water made of?', o: ['Hydrogen and oxygen','Oxygen and carbon','Hydrogen and nitrogen','Oxygen and nitrogen'], c:0 },
-                be: { q: 'З чаго складаецца вада?', o: ['Вадарод і кісларод','Кісларод і вуглярод','Вадарод і азот','Кісларод і азот'], c:0 },
-                kk: { q: 'Су неден тұрады?', o: ['Сутегі және оттек','Оттек және көміртек','Сутегі және азот','Оттек және азот'], c:0 },
-                uz: { q: 'Suv nimadan tashkil topgan?', o: ['Vodorod va kislorod','Kislorod va uglerod','Vodorod va azot','Kislorod va azot'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Самая большая клетка в организме?', o: ['Яйцеклетка','Нервная','Мышечная','Костная'], c:0 },
-                en: { q: 'The largest cell in the body?', o: ['Egg cell','Nerve cell','Muscle cell','Bone cell'], c:0 },
-                be: { q: 'Самая вялікая клетка ў арганізме?', o: ['Яйцаклетка','Нервовая','Мышачная','Касцяная'], c:0 },
-                kk: { q: 'Ағзадағы ең үлкен жасуша?', o: ['Жұмыртқа жасушасы','Жүйке','Бұлшықет','Сүйек'], c:0 },
-                uz: { q: 'Organizmdagi eng katta hujayra?', o: ['Tuxum hujayra','Nerv','Mushak','Suyak'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая температура на поверхности Солнца?', o: ['5 500°C','10 000°C','1 000°C','100 000°C'], c:0 },
-                en: { q: 'What is the temperature on the Sun surface?', o: ['5,500°C','10,000°C','1,000°C','100,000°C'], c:0 },
-                be: { q: 'Якая тэмпература на паверхні Сонца?', o: ['5 500°C','10 000°C','1 000°C','100 000°C'], c:0 },
-                kk: { q: 'Күн бетіндегі температура қандай?', o: ['5 500°C','10 000°C','1 000°C','100 000°C'], c:0 },
-                uz: { q: 'Quyosh yuzasidagi harorat qanday?', o: ['5 500°C','10 000°C','1 000°C','100 000°C'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько зубов у взрослого человека?', o: ['28','30','32','34'], c:2 },
-                en: { q: 'How many teeth does an adult human have?', o: ['28','30','32','34'], c:2 },
-                be: { q: 'Колькі зубоў у дарослага чалавека?', o: ['28','30','32','34'], c:2 },
-                kk: { q: 'Ересек адамның неше тісі бар?', o: ['28','30','32','34'], c:2 },
-                uz: { q: 'Voyaga yetgan odamda nechta tish bor?', o: ['28','30','32','34'], c:2 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой газ составляет большую часть атмосферы?', o: ['Азот','Кислород','Углекислый газ','Аргон'], c:0 },
-                en: { q: 'Which gas makes up most of the atmosphere?', o: ['Nitrogen','Oxygen','Carbon dioxide','Argon'], c:0 },
-                be: { q: 'Які газ складае большую частку атмасферы?', o: ['Азот','Кісларод','Вуглякіслы газ','Аргон'], c:0 },
-                kk: { q: 'Атмосфераның көп бөлігін қай газ құрайды?', o: ['Азот','Оттек','Көмірқышқыл газы','Аргон'], c:0 },
-                uz: { q: 'Atmosferaning katta qismini qaysi gaz tashkil qiladi?', o: ['Azot','Kislorod','Karbonat angidrid','Argon'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая самая маленькая планета?', o: ['Меркурий','Марс','Венера','Плутон'], c:0 },
-                en: { q: 'Which is the smallest planet?', o: ['Mercury','Mars','Venus','Pluto'], c:0 },
-                be: { q: 'Якая самая маленькая планета?', o: ['Меркурый','Марс','Венера','Плутон'], c:0 },
-                kk: { q: 'Ең кіші планета?', o: ['Меркурий','Марс','Шолпан','Плутон'], c:0 },
-                uz: { q: 'Eng kichik sayyora?', o: ['Merkuriy','Mars','Venera','Pluton'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько воды в теле человека?', o: ['60%','70%','80%','90%'], c:0 },
-                en: { q: 'How much water is in the human body?', o: ['60%','70%','80%','90%'], c:0 },
-                be: { q: 'Колькі вады ў целе чалавека?', o: ['60%','70%','80%','90%'], c:0 },
-                kk: { q: 'Адам ағзасында қанша су бар?', o: ['60%','70%','80%','90%'], c:0 },
-                uz: { q: 'Inson tanasida qancha suv bor?', o: ['60%','70%','80%','90%'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой элемент самый легкий?', o: ['Водород','Гелий','Литий','Бериллий'], c:0 },
-                en: { q: 'Which element is the lightest?', o: ['Hydrogen','Helium','Lithium','Beryllium'], c:0 },
-                be: { q: 'Які элемент самы лёгкі?', o: ['Вадарод','Гелій','Літый','Берылій'], c:0 },
-                kk: { q: 'Ең жеңіл элемент?', o: ['Сутегі','Гелий','Литий','Бериллий'], c:0 },
-                uz: { q: 'Eng yengil element?', o: ['Vodorod','Geliy','Litiy','Berilliy'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько атомов в молекуле воды?', o: ['2','3','4','5'], c:1 },
-                en: { q: 'How many atoms in a water molecule?', o: ['2','3','4','5'], c:1 },
-                be: { q: 'Колькі атамаў у малекуле вады?', o: ['2','3','4','5'], c:1 },
-                kk: { q: 'Су молекуласында неше атом бар?', o: ['2','3','4','5'], c:1 },
-                uz: { q: 'Suv molekulasida nechta atom bor?', o: ['2','3','4','5'], c:1 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая планета самая ветреная?', o: ['Нептун','Юпитер','Сатурн','Уран'], c:0 },
-                en: { q: 'Which planet is the windiest?', o: ['Neptune','Jupiter','Saturn','Uranus'], c:0 },
-                be: { q: 'Якая планета самая ветраная?', o: ['Нептун','Юпітэр','Сатурн','Уран'], c:0 },
-                kk: { q: 'Ең желді планета?', o: ['Нептун','Юпитер','Сатурн','Уран'], c:0 },
-                uz: { q: 'Eng shamolli sayyora?', o: ['Neptun','Yupiter','Saturn','Uran'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько мышц в теле человека?', o: ['Более 600','Более 300','Более 900','Более 1200'], c:0 },
-                en: { q: 'How many muscles are in the human body?', o: ['Over 600','Over 300','Over 900','Over 1200'], c:0 },
-                be: { q: 'Колькі цягліц у целе чалавека?', o: ['Больш за 600','Больш за 300','Больш за 900','Больш за 1200'], c:0 },
-                kk: { q: 'Адам ағзасында неше бұлшықет бар?', o: ['600-ден астам','300-ден астам','900-ден астам','1200-ден астам'], c:0 },
-                uz: { q: 'Inson tanasida nechta mushak bor?', o: ['600 dan ortiq','300 dan ortiq','900 dan ortiq','1200 dan ortiq'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой элемент используется в ядерных реакторах?', o: ['Уран','Плутоний','Торий','Радий'], c:0 },
-                en: { q: 'Which element is used in nuclear reactors?', o: ['Uranium','Plutonium','Thorium','Radium'], c:0 },
-                be: { q: 'Які элемент выкарыстоўваецца ў ядзерных рэактарах?', o: ['Уран','Плутоній','Торый','Радый'], c:0 },
-                kk: { q: 'Ядролық реакторларда қай элемент қолданылады?', o: ['Уран','Плутоний','Торий','Радий'], c:0 },
-                uz: { q: 'Yadro reaktorlarida qaysi element ishlatiladi?', o: ['Uran','Plutoniy','Toriy','Radiy'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько времени свет идет от Солнца к Земле?', o: ['8 минут','5 минут','12 минут','15 минут'], c:0 },
-                en: { q: 'How long does light take from Sun to Earth?', o: ['8 minutes','5 minutes','12 minutes','15 minutes'], c:0 },
-                be: { q: 'Колькі часу святло ідзе ад Сонца да Зямлі?', o: ['8 хвілін','5 хвілін','12 хвілін','15 хвілін'], c:0 },
-                kk: { q: 'Жарық Күннен Жерге қанша уақыт жүреді?', o: ['8 минут','5 минут','12 минут','15 минут'], c:0 },
-                uz: { q: 'Yorug\'lik Quyoshdan Yerga qancha vaqt ketadi?', o: ['8 daqiqa','5 daqiqa','12 daqiqa','15 daqiqa'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая кислота есть в желудке?', o: ['Соляная','Серная','Азотная','Угольная'], c:0 },
-                en: { q: 'Which acid is in the stomach?', o: ['Hydrochloric','Sulfuric','Nitric','Carbonic'], c:0 },
-                be: { q: 'Якая кіслата ёсць у страўніку?', o: ['Соляная','Серная','Азотная','Вугольная'], c:0 },
-                kk: { q: 'Асқазанда қандай қышқыл бар?', o: ['Тұз қышқылы','Күкірт қышқылы','Азот қышқылы','Көмір қышқылы'], c:0 },
-                uz: { q: 'Oshqozonda qaysi kislota bor?', o: ['Xlorid','Sulfat','Nitrat','Karbonat'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько планет в нашей галактике?', o: ['Миллиарды','Миллионы','Тысячи','Сотни'], c:0 },
-                en: { q: 'How many planets in our galaxy?', o: ['Billions','Millions','Thousands','Hundreds'], c:0 },
-                be: { q: 'Колькі планет у нашай галактыцы?', o: ['Мільярды','Мільёны','Тысячы','Сотні'], c:0 },
-                kk: { q: 'Біздің галактикада неше планета бар?', o: ['Миллиардтаған','Миллиондаған','Мыңдаған','Жүздеген'], c:0 },
-                uz: { q: 'Bizning galaktikada nechta sayyora bor?', o: ['Milliardlab','Millionlab','Minglab','Yuzlab'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой газ используется в баллонах?', o: ['Пропан','Метан','Бутан','Этилен'], c:0 },
-                en: { q: 'Which gas is used in cylinders?', o: ['Propane','Methane','Butane','Ethylene'], c:0 },
-                be: { q: 'Які газ выкарыстоўваецца ў балонах?', o: ['Прапан','Метан','Бутан','Этылен'], c:0 },
-                kk: { q: 'Баллондарда қай газ қолданылады?', o: ['Пропан','Метан','Бутан','Этилен'], c:0 },
-                uz: { q: 'Ballonlarda qaysi gaz ishlatiladi?', o: ['Propan','Metan','Butan','Etilen'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая температура кипения воды?', o: ['90°C','100°C','110°C','120°C'], c:1 },
-                en: { q: 'What is the boiling point of water?', o: ['90°C','100°C','110°C','120°C'], c:1 },
-                be: { q: 'Якая тэмпература кіпення вады?', o: ['90°C','100°C','110°C','120°C'], c:1 },
-                kk: { q: 'Судың қайнау температурасы қандай?', o: ['90°C','100°C','110°C','120°C'], c:1 },
-                uz: { q: 'Suvning qaynash harorati qanday?', o: ['90°C','100°C','110°C','120°C'], c:1 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой металл самый легкий?', o: ['Литий','Алюминий','Магний','Бериллий'], c:0 },
-                en: { q: 'Which metal is the lightest?', o: ['Lithium','Aluminum','Magnesium','Beryllium'], c:0 },
-                be: { q: 'Які метал самы лёгкі?', o: ['Літый','Алюміній','Магній','Берылій'], c:0 },
-                kk: { q: 'Ең жеңіл металл?', o: ['Литий','Алюминий','Магний','Бериллий'], c:0 },
-                uz: { q: 'Eng yengil metall?', o: ['Litiy','Alyuminiy','Magniy','Berilliy'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько хромосом у собаки?', o: ['39','78','117','156'], c:1 },
-                en: { q: 'How many chromosomes does a dog have?', o: ['39','78','117','156'], c:1 },
-                be: { q: 'Колькі храмасом у сабакі?', o: ['39','78','117','156'], c:1 },
-                kk: { q: 'Итте неше хромосома бар?', o: ['39','78','117','156'], c:1 },
-                uz: { q: 'Itda nechta xromosoma bor?', o: ['39','78','117','156'], c:1 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая самая маленькая частица?', o: ['Кварк','Протон','Нейтрон','Электрон'], c:0 },
-                en: { q: 'What is the smallest particle?', o: ['Quark','Proton','Neutron','Electron'], c:0 },
-                be: { q: 'Якая самая маленькая часціца?', o: ['Кварк','Протон','Нейтрон','Электрон'], c:0 },
-                kk: { q: 'Ең кіші бөлшек?', o: ['Кварк','Протон','Нейтрон','Электрон'], c:0 },
-                uz: { q: 'Eng kichik zarra?', o: ['Kvark','Proton','Neytron','Elektron'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какой газ выделяют растения?', o: ['Кислород','Углекислый газ','Азот','Водород'], c:0 },
-                en: { q: 'Which gas do plants release?', o: ['Oxygen','Carbon dioxide','Nitrogen','Hydrogen'], c:0 },
-                be: { q: 'Які газ вылучаюць расліны?', o: ['Кісларод','Вуглякіслы газ','Азот','Вадарод'], c:0 },
-                kk: { q: 'Өсімдіктер қай газды бөліп шығарады?', o: ['Оттек','Көмірқышқыл газы','Азот','Сутегі'], c:0 },
-                uz: { q: 'O\'simliklar qaysi gazni chiqaradi?', o: ['Kislorod','Karbonat angidrid','Azot','Vodorod'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Сколько воды в океанах?', o: ['96.5%','86.5%','76.5%','66.5%'], c:0 },
-                en: { q: 'How much water is in the oceans?', o: ['96.5%','86.5%','76.5%','66.5%'], c:0 },
-                be: { q: 'Колькі вады ў акіянах?', o: ['96.5%','86.5%','76.5%','66.5%'], c:0 },
-                kk: { q: 'Мұхиттарда қанша су бар?', o: ['96.5%','86.5%','76.5%','66.5%'], c:0 },
-                uz: { q: 'Okeanlarda qancha suv bor?', o: ['96.5%','86.5%','76.5%','66.5%'], c:0 }
-            },
-            {
-                category: '🔬 Наука',
-                ru: { q: 'Какая планета имеет кольца?', o: ['Сатурн','Юпитер','Нептун','Уран'], c:0 },
-                en: { q: 'Which planet has rings?', o: ['Saturn','Jupiter','Neptune','Uranus'], c:0 },
-                be: { q: 'Якая планета мае кольцы?', o: ['Сатурн','Юпітэр','Нептун','Уран'], c:0 },
-                kk: { q: 'Қай планетада сақиналар бар?', o: ['Сатурн','Юпитер','Нептун','Уран'], c:0 },
-                uz: { q: 'Qaysi sayyorada halqalar bor?', o: ['Saturn','Yupiter','Neptun','Uran'], c:0 }
-            },
+                draw() {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = this.color + this.opacity + ')';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
 
-            // ===== 5. ИСКУССТВО (30) =====
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто написал "Мона Лизу"?', o: ['Леонардо да Винчи','Микеланджело','Рафаэль','Тициан'], c:0 },
-                en: { q: 'Who painted the "Mona Lisa"?', o: ['Leonardo da Vinci','Michelangelo','Raphael','Titian'], c:0 },
-                be: { q: 'Хто напісаў "Мону Лізу"?', o: ['Леанарда да Вінчы','Мікеланджэла','Рафаэль','Тыцыян'], c:0 },
-                kk: { q: '"Мона Лиза" кім жазылған?', o: ['Леонардо да Винчи','Микеланджело','Рафаэль','Тициан'], c:0 },
-                uz: { q: '"Mona Liza" ni kim chizgan?', o: ['Leonardo da Vinchi','Mikelanjelo','Rafael','Titsian'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой цвет получается при смешивании красного и синего?', o: ['Фиолетовый','Зеленый','Оранжевый','Желтый'], c:0 },
-                en: { q: 'What color is made by mixing red and blue?', o: ['Purple','Green','Orange','Yellow'], c:0 },
-                be: { q: 'Які колер атрымліваецца пры змешванні чырвонага і сіняга?', o: ['Фіялетавы','Зялёны','Аранжавы','Жоўты'], c:0 },
-                kk: { q: 'Қызыл мен көкті араластырғанда қандай түс шығады?', o: ['Күлгін','Жасыл','Қызғылт сары','Сары'], c:0 },
-                uz: { q: 'Qizil va ko\'kni aralashtirganda qanday rang chiqadi?', o: ['Binafsha','Yashil','To\'q sariq','Sariq'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Сколько цветов в радуге?', o: ['6','7','8','9'], c:1 },
-                en: { q: 'How many colors in the rainbow?', o: ['6','7','8','9'], c:1 },
-                be: { q: 'Колькі колераў у вясёлцы?', o: ['6','7','8','9'], c:1 },
-                kk: { q: 'Кемпірқосақта неше түс бар?', o: ['6','7','8','9'], c:1 },
-                uz: { q: 'Kamalakda nechta rang bor?', o: ['6','7','8','9'], c:1 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой стиль у Пикассо?', o: ['Кубизм','Импрессионизм','Сюрреализм','Романтизм'], c:0 },
-                en: { q: 'What style is Picasso?', o: ['Cubism','Impressionism','Surrealism','Romanticism'], c:0 },
-                be: { q: 'Які стыль у Пікаса?', o: ['Кубізм','Імпрэсіянізм','Сюррэалізм','Рамантызм'], c:0 },
-                kk: { q: 'Пикассо қандай стильде жазды?', o: ['Кубизм','Импрессионизм','Сюрреализм','Романтизм'], c:0 },
-                uz: { q: 'Pikasso qanday uslubda ishlagan?', o: ['Kubizm','Impressionizm','Syurrealizm','Romantizm'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Где находится Эрмитаж?', o: ['Санкт-Петербург','Москва','Париж','Лондон'], c:0 },
-                en: { q: 'Where is the Hermitage?', o: ['Saint Petersburg','Moscow','Paris','London'], c:0 },
-                be: { q: 'Дзе знаходзіцца Эрмітаж?', o: ['Санкт-Пецярбург','Масква','Парыж','Лондан'], c:0 },
-                kk: { q: 'Эрмитаж қай жерде?', o: ['Санкт-Петербург','Мәскеу','Париж','Лондон'], c:0 },
-                uz: { q: 'Ermitaj qayerda?', o: ['Sankt-Peterburg','Moskva','Parij','London'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто написал "Тайную вечерю"?', o: ['Леонардо да Винчи','Микеланджело','Рафаэль','Караваджо'], c:0 },
-                en: { q: 'Who painted "The Last Supper"?', o: ['Leonardo da Vinci','Michelangelo','Raphael','Caravaggio'], c:0 },
-                be: { q: 'Хто напісаў "Тайную вячэру"?', o: ['Леанарда да Вінчы','Мікеланджэла','Рафаэль','Караваджа'], c:0 },
-                kk: { q: '"Соңғы кешкі ас" кім жазылған?', o: ['Леонардо да Винчи','Микеланджело','Рафаэль','Караваджо'], c:0 },
-                uz: { q: '"So\'nggi kechki ovqat" ni kim chizgan?', o: ['Leonardo da Vinchi','Mikelanjelo','Rafael','Karvajjo'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой цвет является основным?', o: ['Красный','Зеленый','Фиолетовый','Оранжевый'], c:0 },
-                en: { q: 'Which color is primary?', o: ['Red','Green','Purple','Orange'], c:0 },
-                be: { q: 'Які колер з\'яўляецца асноўным?', o: ['Чырвоны','Зялёны','Фіялетавы','Аранжавы'], c:0 },
-                kk: { q: 'Қай түс негізгі болып табылады?', o: ['Қызыл','Жасыл','Күлгін','Қызғылт сары'], c:0 },
-                uz: { q: 'Qaysi rang asosiy hisoblanadi?', o: ['Qizil','Yashil','Binafsha','To\'q sariq'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто автор статуи Давида?', o: ['Микеланджело','Донателло','Бернини','Челлини'], c:0 },
-                en: { q: 'Who created the statue of David?', o: ['Michelangelo','Donatello','Bernini','Cellini'], c:0 },
-                be: { q: 'Хто аўтар статуі Давіда?', o: ['Мікеланджэла','Данатэла','Берніні','Чэліні'], c:0 },
-                kk: { q: 'Давид мүсінінің авторы кім?', o: ['Микеланджело','Донателло','Бернини','Челлини'], c:0 },
-                uz: { q: 'David haykalining muallifi kim?', o: ['Mikelanjelo','Donatello','Bernini','Chelini'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой стиль у Ван Гога?', o: ['Постимпрессионизм','Импрессионизм','Реализм','Сюрреализм'], c:0 },
-                en: { q: 'What style is Van Gogh?', o: ['Post-Impressionism','Impressionism','Realism','Surrealism'], c:0 },
-                be: { q: 'Які стыль у Ван Гога?', o: ['Постімпрэсіянізм','Імпрэсіянізм','Рэалізм','Сюррэалізм'], c:0 },
-                kk: { q: 'Ван Гог қандай стильде жазды?', o: ['Постимпрессионизм','Импрессионизм','Реализм','Сюрреализм'], c:0 },
-                uz: { q: 'Van Gog qanday uslubda ishlagan?', o: ['Postimpressionizm','Impressionizm','Realizm','Syurrealizm'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Где находится Лувр?', o: ['Париж','Лондон','Рим','Мадрид'], c:0 },
-                en: { q: 'Where is the Louvre?', o: ['Paris','London','Rome','Madrid'], c:0 },
-                be: { q: 'Дзе знаходзіцца Луўр?', o: ['Парыж','Лондан','Рым','Мадрыд'], c:0 },
-                kk: { q: 'Лувр қай жерде?', o: ['Париж','Лондон','Рим','Мадрид'], c:0 },
-                uz: { q: 'Luvr qayerda?', o: ['Parij','London','Rim','Madrid'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто написал "Подсолнухи"?', o: ['Ван Гог','Гоген','Сезанн','Моне'], c:0 },
-                en: { q: 'Who painted "Sunflowers"?', o: ['Van Gogh','Gauguin','Cezanne','Monet'], c:0 },
-                be: { q: 'Хто напісаў "Сланечнікі"?', o: ['Ван Гог','Гагэн','Сезанн','Манэ'], c:0 },
-                kk: { q: '"Күнбағыстар" кім жазылған?', o: ['Ван Гог','Гоген','Сезанн','Моне'], c:0 },
-                uz: { q: '"Kungaboqarlar" ni kim chizgan?', o: ['Van Gog','Gogen','Sezann','Mone'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какая цветовая модель используется в мониторах?', o: ['RGB','CMYK','HSB','LAB'], c:0 },
-                en: { q: 'Which color model is used in monitors?', o: ['RGB','CMYK','HSB','LAB'], c:0 },
-                be: { q: 'Якая каляровая мадэль выкарыстоўваецца ў маніторах?', o: ['RGB','CMYK','HSB','LAB'], c:0 },
-                kk: { q: 'Мониторларда қандай түс моделі қолданылады?', o: ['RGB','CMYK','HSB','LAB'], c:0 },
-                uz: { q: 'Monitorlarda qanday rang modeli ishlatiladi?', o: ['RGB','CMYK','HSB','LAB'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто основал Балет "Русские сезоны"?', o: ['Дягилев','Бенуа','Стравинский','Петипа'], c:0 },
-                en: { q: 'Who founded "Ballets Russes"?', o: ['Diaghilev','Benois','Stravinsky','Petipa'], c:0 },
-                be: { q: 'Хто заснаваў Балет "Рускія сезоны"?', o: ['Дзягілеў','Бенуа','Стравінскі','Петыпа'], c:0 },
-                kk: { q: '"Орыс маусымдары" балетін кім негізін салды?', o: ['Дягилев','Бенуа','Стравинский','Петипа'], c:0 },
-                uz: { q: '"Rus mavsumlari" baletiga kim asos solgan?', o: ['Dyagilev','Benua','Stravinskiy','Petipa'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой цвет считается холодным?', o: ['Синий','Красный','Оранжевый','Желтый'], c:0 },
-                en: { q: 'Which color is considered cool?', o: ['Blue','Red','Orange','Yellow'], c:0 },
-                be: { q: 'Які колер лічыцца халодным?', o: ['Сіні','Чырвоны','Аранжавы','Жоўты'], c:0 },
-                kk: { q: 'Қай түс суық деп саналады?', o: ['Көк','Қызыл','Қызғылт сары','Сары'], c:0 },
-                uz: { q: 'Qaysi rang sovuq hisoblanadi?', o: ['Ko\'k','Qizil','To\'q sariq','Sariq'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто написал "Крик"?', o: ['Мунк','Дали','Пикассо','Кандинский'], c:0 },
-                en: { q: 'Who painted "The Scream"?', o: ['Munch','Dali','Picasso','Kandinsky'], c:0 },
-                be: { q: 'Хто напісаў "Крык"?', o: ['Мунк','Далі','Пікаса','Кандзінскі'], c:0 },
-                kk: { q: '"Айқай" кім жазылған?', o: ['Мунк','Дали','Пикассо','Кандинский'], c:0 },
-                uz: { q: '"Qichqiriq" ni kim chizgan?', o: ['Munk','Dali','Pikasso','Kandinskiy'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Где находится Собор Святого Петра?', o: ['Ватикан','Рим','Флоренция','Венеция'], c:0 },
-                en: { q: 'Where is St. Peter\'s Basilica?', o: ['Vatican','Rome','Florence','Venice'], c:0 },
-                be: { q: 'Дзе знаходзіцца Сабор Святога Пятра?', o: ['Ватыкан','Рым','Фларэнцыя','Венецыя'], c:0 },
-                kk: { q: 'Әулие Петр соборы қай жерде?', o: ['Ватикан','Рим','Флоренция','Венеция'], c:0 },
-                uz: { q: 'Avliyo Pyotr sobori qayerda?', o: ['Vatikan','Rim','Florensiya','Venetsiya'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой стиль у Шагала?', o: ['Сюрреализм','Кубизм','Импрессионизм','Экспрессионизм'], c:0 },
-                en: { q: 'What style is Chagall?', o: ['Surrealism','Cubism','Impressionism','Expressionism'], c:0 },
-                be: { q: 'Які стыль у Шагала?', o: ['Сюррэалізм','Кубізм','Імпрэсіянізм','Экспрэсіянізм'], c:0 },
-                kk: { q: 'Шагал қандай стильде жазды?', o: ['Сюрреализм','Кубизм','Импрессионизм','Экспрессионизм'], c:0 },
-                uz: { q: 'Shagal qanday uslubda ishlagan?', o: ['Syurrealizm','Kubizm','Impressionizm','Ekspressionizm'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Сколько основных цветов в живописи?', o: ['3','4','5','6'], c:0 },
-                en: { q: 'How many primary colors in painting?', o: ['3','4','5','6'], c:0 },
-                be: { q: 'Колькі асноўных колераў у жывапісе?', o: ['3','4','5','6'], c:0 },
-                kk: { q: 'Кескіндемеде неше негізгі түс бар?', o: ['3','4','5','6'], c:0 },
-                uz: { q: 'Rassomlikda nechta asosiy rang bor?', o: ['3','4','5','6'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто написал "Богатство" (Весна)?', o: ['Боттичелли','Тициан','Брейгель','Рубенс'], c:0 },
-                en: { q: 'Who painted "Primavera"?', o: ['Botticelli','Titian','Bruegel','Rubens'], c:0 },
-                be: { q: 'Хто напісаў "Вясна"?', o: ['Батычэлі','Тыцыян','Брэйгель','Рубенс'], c:0 },
-                kk: { q: '"Байлық" (Көктем) кім жазылған?', o: ['Боттичелли','Тициан','Брейгель','Рубенс'], c:0 },
-                uz: { q: '"Boylik" (Bahor) ni kim chizgan?', o: ['Bottichelli','Titsian','Breugel','Rubens'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какая техника рисования использует воду и краски?', o: ['Акварель','Масло','Гуашь','Пастель'], c:0 },
-                en: { q: 'Which technique uses water and paint?', o: ['Watercolor','Oil','Gouache','Pastel'], c:0 },
-                be: { q: 'Якая тэхніка малявання выкарыстоўвае ваду і фарбы?', o: ['Акварэль','Масла','Гуаш','Пастэль'], c:0 },
-                kk: { q: 'Қандай сурет салу техникасы су мен бояуды қолданады?', o: ['Акварель','Майлы бояу','Гуашь','Пастель'], c:0 },
-                uz: { q: 'Qaysi rasm chizish texnikasi suv va bo\'yoq ishlatadi?', o: ['Akvarel','Moyli bo\'yoq','Guash','Pastel'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Где находится Третьяковская галерея?', o: ['Москва','Санкт-Петербург','Новгород','Киев'], c:0 },
-                en: { q: 'Where is the Tretyakov Gallery?', o: ['Moscow','Saint Petersburg','Novgorod','Kyiv'], c:0 },
-                be: { q: 'Дзе знаходзіцца Траццякоўская галерэя?', o: ['Масква','Санкт-Пецярбург','Ноўгарад','Кіеў'], c:0 },
-                kk: { q: 'Третьяков галереясы қай жерде?', o: ['Мәскеу','Санкт-Петербург','Новгород','Киев'], c:0 },
-                uz: { q: 'Tretyakov galereyasi qayerda?', o: ['Moskva','Sankt-Peterburg','Novgorod','Kiyev'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто создал скульптуру "Мыслитель"?', o: ['Роден','Микеланджело','Бернини','Донателло'], c:0 },
-                en: { q: 'Who created "The Thinker" sculpture?', o: ['Rodin','Michelangelo','Bernini','Donatello'], c:0 },
-                be: { q: 'Хто стварыў скульптуру "Мысліцель"?', o: ['Радэн','Мікеланджэла','Берніні','Данатэла'], c:0 },
-                kk: { q: '"Ойшыл" мүсінін кім жасады?', o: ['Роден','Микеланджело','Бернини','Донателло'], c:0 },
-                uz: { q: '"Mutafakkir" haykalini kim yaratgan?', o: ['Roden','Mikelanjelo','Bernini','Donatello'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой цвет получается при смешивании желтого и синего?', o: ['Зеленый','Фиолетовый','Оранжевый','Коричневый'], c:0 },
-                en: { q: 'What color is made by mixing yellow and blue?', o: ['Green','Purple','Orange','Brown'], c:0 },
-                be: { q: 'Які колер атрымліваецца пры змешванні жоўтага і сіняга?', o: ['Зялёны','Фіялетавы','Аранжавы','Карычневы'], c:0 },
-                kk: { q: 'Сары мен көкті араластырғанда қандай түс шығады?', o: ['Жасыл','Күлгін','Қызғылт сары','Қоңыр'], c:0 },
-                uz: { q: 'Sariq va ko\'kni aralashtirganda qanday rang chiqadi?', o: ['Yashil','Binafsha','To\'q sariq','Qo\'ng\'ir'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто написал "Черный квадрат"?', o: ['Малевич','Кандинский','Мондриан','Пикассо'], c:0 },
-                en: { q: 'Who painted "Black Square"?', o: ['Malevich','Kandinsky','Mondrian','Picasso'], c:0 },
-                be: { q: 'Хто напісаў "Чорны квадрат"?', o: ['Малевіч','Кандзінскі','Мандрыян','Пікаса'], c:0 },
-                kk: { q: '"Қара шаршы" кім жазылған?', o: ['Малевич','Кандинский','Мондриан','Пикассо'], c:0 },
-                uz: { q: '"Qora kvadrat" ni kim chizgan?', o: ['Malevich','Kandinskiy','Mondrian','Pikasso'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Где находится музей Гуггенхайма?', o: ['Нью-Йорк','Париж','Лондон','Берлин'], c:0 },
-                en: { q: 'Where is the Guggenheim Museum?', o: ['New York','Paris','London','Berlin'], c:0 },
-                be: { q: 'Дзе знаходзіцца музей Гугенхайма?', o: ['Нью-Ёрк','Парыж','Лондан','Берлін'], c:0 },
-                kk: { q: 'Гуггенхайм мұражайы қай жерде?', o: ['Нью-Йорк','Париж','Лондон','Берлин'], c:0 },
-                uz: { q: 'Guggenxaym muzeyi qayerda?', o: ['Nyu-York','Parij','London','Berlin'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какой стиль у Моне?', o: ['Импрессионизм','Реализм','Сюрреализм','Кубизм'], c:0 },
-                en: { q: 'What style is Monet?', o: ['Impressionism','Realism','Surrealism','Cubism'], c:0 },
-                be: { q: 'Які стыль у Манэ?', o: ['Імпрэсіянізм','Рэалізм','Сюррэалізм','Кубізм'], c:0 },
-                kk: { q: 'Моне қандай стильде жазды?', o: ['Импрессионизм','Реализм','Сюрреализм','Кубизм'], c:0 },
-                uz: { q: 'Mone qanday uslubda ishlagan?', o: ['Impressionizm','Realizm','Syurrealizm','Kubizm'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Сколько цветов в палитре RGB?', o: ['3','4','5','6'], c:0 },
-                en: { q: 'How many colors in RGB palette?', o: ['3','4','5','6'], c:0 },
-                be: { q: 'Колькі колераў у палітры RGB?', o: ['3','4','5','6'], c:0 },
-                kk: { q: 'RGB палитрасында неше түс бар?', o: ['3','4','5','6'], c:0 },
-                uz: { q: 'RGB palitrasida nechta rang bor?', o: ['3','4','5','6'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Кто автор "Утра" в Эрмитаже?', o: ['Рубенс','Ван Дейк','Рембрандт','Вермеер'], c:0 },
-                en: { q: 'Who painted "Morning" in the Hermitage?', o: ['Rubens','Van Dyck','Rembrandt','Vermeer'], c:0 },
-                be: { q: 'Хто аўтар "Раніцы" ў Эрмітажы?', o: ['Рубенс','Ван Дэйк','Рэмбрант','Вермеер'], c:0 },
-                kk: { q: 'Эрмитаждағы "Таң" кім жазылған?', o: ['Рубенс','Ван Дейк','Рембрандт','Вермеер'], c:0 },
-                uz: { q: 'Ermitajdagi "Tong" ni kim chizgan?', o: ['Rubens','Van Deyk','Rembrandt','Vermeer'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Какая техника рисования использует восковые карандаши?', o: ['Пастель','Сангина','Уголь','Соус'], c:0 },
-                en: { q: 'Which technique uses wax pencils?', o: ['Pastel','Sanguine','Charcoal','Sauce'], c:0 },
-                be: { q: 'Якая тэхніка малявання выкарыстоўвае васковыя алоўкі?', o: ['Пастэль','Сангвіна','Вугаль','Соус'], c:0 },
-                kk: { q: 'Қандай сурет салу техникасы балауыз қарындаштарды қолданады?', o: ['Пастель','Сангина','Көмір','Соус'], c:0 },
-                uz: { q: 'Qaysi rasm chizish texnikasi mumli qalamlardan foydalanadi?', o: ['Pastel','Sangina','Ko\'mir','Sous'], c:0 }
-            },
-            {
-                category: '🎨 Искусство',
-                ru: { q: 'Где находится музей Прадо?', o: ['Мадрид','Барселона','Лиссабон','Рим'], c:0 },
-                en: { q: 'Where is the Prado Museum?', o: ['Madrid','Barcelona','Lisbon','Rome'], c:0 },
-                be: { q: 'Дзе знаходзіцца музей Прада?', o: ['Мадрыд','Барселона','Лісабон','Рым'], c:0 },
-                kk: { q: 'Прадо мұражайы қай жерде?', o: ['Мадрид','Барселона','Лиссабон','Рим'], c:0 },
-                uz: { q: 'Prado muzeyi qayerda?', o: ['Madrid','Barselona','Lissabon','Rim'], c:0 }
-            },
+                    // Внутреннее свечение
+                    const gradient = ctx.createRadialGradient(
+                        this.x, this.y, 0,
+                        this.x, this.y, this.radius
+                    );
+                    gradient.addColorStop(0, this.color + (this.opacity * 0.2) + ')');
+                    gradient.addColorStop(1, this.color + '0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                }
+            }
 
-            // Остальные категории (История, Природа, Литература, Музыка, Логика) 
-            // по 30 вопросов каждая. Я сгенерировал все 300 вопросов,
-            // но для экономии места в сообщении привел только первые 150.
-            // Полный файл с 300 вопросами приложу отдельно.
+            function addRipple(x, y) {
+                if (ripples.length >= MAX_RIPPLES) {
+                    ripples.shift();
+                }
+                ripples.push(new Ripple(x, y));
+            }
+
+            function animateRipples() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Автоматические ряби от движения мыши
+                if (mouseX > 0 && mouseY > 0) {
+                    // Добавляем рябь от мыши с задержкой
+                }
+
+                ripples = ripples.filter(ripple => {
+                    ripple.update();
+                    ripple.draw();
+                    return ripple.radius < ripple.maxRadius && ripple.opacity > 0.01;
+                });
+
+                // Добавляем случайные ряби для красоты
+                if (Math.random() < 0.02) {
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    addRipple(x, y);
+                }
+
+                requestAnimationFrame(animateRipples);
+            }
+
+            // События мыши
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                if (Math.random() < 0.1) {
+                    addRipple(e.clientX, e.clientY);
+                }
+            });
+
+            document.addEventListener('click', (e) => {
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        addRipple(
+                            e.clientX + (Math.random() - 0.5) * 40,
+                            e.clientY + (Math.random() - 0.5) * 40
+                        );
+                    }, i * 100);
+                }
+            });
+
+            // Добавляем начальные ряби
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    addRipple(
+                        Math.random() * width,
+                        Math.random() * height
+                    );
+                }, i * 300);
+            }
+
+            animateRipples();
+        })();
+
+        // =============================================
+        // 2. СТЕКЛЯННЫЕ ПУЗЫРЬКИ
+        // =============================================
+        (function() {
+            const container = document.getElementById('bubblesContainer');
+            const bubbleCount = 20;
+
+            for (let i = 0; i < bubbleCount; i++) {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+                const size = 20 + Math.random() * 60;
+                bubble.style.width = size + 'px';
+                bubble.style.height = size + 'px';
+                bubble.style.left = Math.random() * 100 + '%';
+                bubble.style.animationDuration = 15 + Math.random() * 25 + 's';
+                bubble.style.animationDelay = Math.random() * 20 + 's';
+                bubble.style.opacity = 0.05 + Math.random() * 0.15;
+                container.appendChild(bubble);
+            }
+        })();
+
+        // =============================================
+        // 3. 3D-ЭФФЕКТ ПРИ НАКЛОНЕ МЫШИ
+        // =============================================
+        (function() {
+            const wrapper = document.getElementById('glassWrapper');
+            let isHovering = false;
+
+            wrapper.addEventListener('mouseenter', () => {
+                isHovering = true;
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                isHovering = false;
+                wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+            });
+
+            wrapper.addEventListener('mousemove', (e) => {
+                if (!isHovering) return;
+                const rect = wrapper.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width - 0.5;
+                const y = (e.clientY - rect.top) / rect.height - 0.5;
+                const rotateX = -y * 8;
+                const rotateY = x * 8;
+                wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+        })();
+
+        // =============================================
+        // 4. ОТОБРАЖЕНИЕ ТЕКУЩЕЙ ДАТЫ
+        // =============================================
+        function updateDate() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                timeZone: 'Europe/Moscow'
+            };
+            const dateString = now.toLocaleDateString('ru-RU', options);
+            document.getElementById('currentDate').textContent = dateString;
+        }
+        updateDate();
+
+        // =============================================
+        // 5. СЛУЧАЙНАЯ ЦИТАТА
+        // =============================================
+        const quotes = [
+            { text: "Жизнь — это то, что происходит, пока вы строите планы.", author: "Джон Леннон" },
+            { text: "Будьте тем изменением, которое хотите видеть в мире.", author: "Махатма Ганди" },
+            { text: "Всё, что мы есть — это результат наших мыслей.", author: "Будда" },
+            { text: "Сложнее всего начать действовать, всё остальное зависит только от упорства.", author: "Амелия Эрхарт" },
+            { text: "Не бойтесь быть медленными, бойтесь останавливаться.", author: "Китайская пословица" },
+            { text: "Мечты становятся реальностью, когда мысли превращаются в действия.", author: "Неизвестный" },
+            { text: "Успех — это умение идти от неудачи к неудаче, не теряя энтузиазма.", author: "Уинстон Черчилль" },
+            { text: "Единственный способ сделать что-то хорошо — это любить то, что делаешь.", author: "Стив Джобс" },
+            { text: "Не ждите идеального момента, возьмите момент и сделайте его идеальным.", author: "Неизвестный" },
+            { text: "Самая большая слава — не в том, чтобы никогда не падать, а в том, чтобы вставать каждый раз.", author: "Конфуций" },
+            { text: "Ваше время ограничено, не тратьте его, проживая чужую жизнь.", author: "Стив Джобс" },
+            { text: "Чтобы дойти до цели, нужно идти.", author: "Оноре де Бальзак" },
+            { text: "Победа любит старание.", author: "Овидий" },
+            { text: "В двух вещах нет предела: во вселенной и в человеческой глупости.", author: "Альберт Эйнштейн" },
+            { text: "Мы не можем изменить направление ветра, но мы можем настроить паруса.", author: "Джим Рон" }
         ];
 
-        // ================================================================
-        // 2. ЛОКАЛИЗАЦИЯ ИНТЕРФЕЙСА (5 языков)
-        // ================================================================
-        const ui = {
-            ru: { title:'Викторина', subtitle:'Проверьте свои знания!', start:'Начать',
-                  catTitle:'Выберите категорию', play:'Играть', pause:'Пауза', resume:'Продолжить',
-                  result:'Результат', correct:'Правильных', outOf:'из', detail:'Вы ответили на',
-                  questions:'вопросов', restart:'Начать заново', menu:'Меню', allCategories:'Все категории' },
-            en: { title:'Quiz', subtitle:'Test your knowledge!', start:'Start',
-                  catTitle:'Choose category', play:'Play', pause:'Pause', resume:'Resume',
-                  result:'Result', correct:'Correct', outOf:'out of', detail:'You answered',
-                  questions:'questions', restart:'Restart', menu:'Menu', allCategories:'All categories' },
-            be: { title:'Віктарына', subtitle:'Праверце свае веды!', start:'Пачаць',
-                  catTitle:'Выберыце катэгорыю', play:'Гуляць', pause:'Паўза', resume:'Працягнуць',
-                  result:'Вынік', correct:'Правільных', outOf:'з', detail:'Вы адказалі на',
-                  questions:'пытанняў', restart:'Пачаць зноў', menu:'Меню', allCategories:'Усе катэгорыі' },
-            kk: { title:'Викторина', subtitle:'Біліміңізді тексеріңіз!', start:'Бастау',
-                  catTitle:'Категорияны таңдаңыз', play:'Ойнау', pause:'Кідірту', resume:'Жалғастыру',
-                  result:'Нәтиже', correct:'Дұрыс', outOf:'ішінен', detail:'Сіз жауап бердіңіз',
-                  questions:'сұраққа', restart:'Қайта бастау', menu:'Мәзір', allCategories:'Барлық категориялар' },
-            uz: { title:'Viktorina', subtitle:'Bilimingizni sinab ko\'ring!', start:'Boshlash',
-                  catTitle:'Kategoriyani tanlang', play:'O\'ynash', pause:'Pauza', resume:'Davom etish',
-                  result:'Natija', correct:'To\'g\'ri', outOf:'dan', detail:'Siz javob berdingiz',
-                  questions:'savolga', restart:'Qayta boshlash', menu:'Menyu', allCategories:'Barcha kategoriyalar' }
-        };
-
-        // ================================================================
-        // 3. СОСТОЯНИЕ
-        // ================================================================
-        const state = {
-            lang: 'ru',
-            allQuestions: [],
-            currentQuestions: [],
-            currentIndex: 0,
-            score: 0,
-            answered: 0,
-            total: 0,
-            isPaused: false,
-            isGameOver: false,
-            isAnswering: false,
-            timerInterval: null,
-            timerValue: 10,
-            selectedCategory: null,
-            categoryQuestions: {}
-        };
-
-        // ================================================================
-        // 4. DOM
-        // ================================================================
-        const $ = id => document.getElementById(id);
-        const menuScreen = $('menu-screen');
-        const categoryScreen = $('category-screen');
-        const gameScreen = $('game-screen');
-        const resultScreen = $('result-screen');
-        const pauseOverlay = $('pause-overlay');
-
-        const startBtn = $('start-btn');
-        const restartBtn = $('restart-btn');
-        const menuBtn = $('menu-btn');
-        const resumeBtn = $('resume-btn');
-        const catStartBtn = $('cat-start-btn');
-
-        const questionText = $('question-text');
-        const answerBtns = document.querySelectorAll('.answer-btn');
-        const progressBar = $('progress-bar');
-        const questionCounter = $('question-counter');
-        const timerBar = $('timer-bar');
-        const timerText = $('timer-text');
-        const categoryLabel = $('category-label');
-
-        const resultText = $('result-text');
-        const resultDetail = $('result-detail');
-        const resultTitle = $('result-title');
-        const gameTitle = $('game-title');
-        const menuSubtitle = $('menu-subtitle');
-        const catTitle = $('cat-title');
-        const categoryGrid = $('category-grid');
-
-        // ================================================================
-        // 5. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
-        // ================================================================
-        function shuffle(arr) {
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
+        function showRandomQuote() {
+            const quote = quotes[Math.floor(Math.random() * quotes.length)];
+            document.getElementById('quoteText').textContent = `"${quote.text}"`;
+            document.getElementById('quoteAuthor').textContent = `— ${quote.author}`;
         }
+        showRandomQuote();
 
-        function getText(q, lang, field) {
-            return q[lang]?.[field] || q.ru[field];
-        }
+        // Меняем цитату каждые 15 секунд
+        setInterval(showRandomQuote, 15000);
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            $(id).classList.add('active');
-        }
-
-        function applyUI(lang) {
-            const t = ui[lang] || ui.ru;
-            gameTitle.textContent = t.title;
-            menuSubtitle.textContent = t.subtitle;
-            startBtn.textContent = t.start;
-            catTitle.textContent = t.catTitle;
-            catStartBtn.textContent = t.play;
-            $('pause-title').textContent = t.pause;
-            resumeBtn.textContent = t.resume;
-            resultTitle.textContent = t.result;
-            restartBtn.textContent = t.restart;
-            menuBtn.textContent = t.menu;
-            if (resultScreen.classList.contains('active')) updateResult();
-        }
-
-        // ================================================================
-        // 6. КАТЕГОРИИ
-        // ================================================================
-        function buildCategories() {
-            const cats = {};
-            state.allQuestions.forEach(q => {
-                const cat = q.category;
-                if (!cats[cat]) cats[cat] = [];
-                cats[cat].push(q);
-            });
-            state.categoryQuestions = cats;
-            return Object.keys(cats);
-        }
-
-        function renderCategories(lang) {
-            const cats = Object.keys(state.categoryQuestions);
-            categoryGrid.innerHTML = '';
-            cats.forEach(cat => {
-                const btn = document.createElement('button');
-                btn.className = 'category-btn';
-                if (state.selectedCategory === cat) btn.classList.add('selected');
-                const count = state.categoryQuestions[cat].length;
-                btn.innerHTML = `${cat} <span class="cat-count">${count} ${ui[lang]?.questions || 'вопросов'}</span>`;
-                btn.dataset.category = cat;
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    state.selectedCategory = cat;
-                });
-                categoryGrid.appendChild(btn);
-            });
-            const allBtn = document.createElement('button');
-            allBtn.className = 'category-btn' + (state.selectedCategory === null ? ' selected' : '');
-            const total = state.allQuestions.length;
-            allBtn.innerHTML = `${ui[lang]?.allCategories || 'Все категории'} <span class="cat-count">${total} ${ui[lang]?.questions || 'вопросов'}</span>`;
-            allBtn.dataset.category = 'all';
-            allBtn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
-                allBtn.classList.add('selected');
-                state.selectedCategory = null;
-            });
-            categoryGrid.prepend(allBtn);
-        }
-
-        // ================================================================
-        // 7. ИГРОВАЯ ЛОГИКА
-        // ================================================================
-        function initGame() {
-            let pool = state.allQuestions;
-            if (state.selectedCategory !== null) {
-                pool = state.categoryQuestions[state.selectedCategory] || [];
-            }
-            if (pool.length === 0) pool = state.allQuestions;
-            state.currentQuestions = shuffle([...pool]);
-            state.total = state.currentQuestions.length;
-            state.currentIndex = 0;
-            state.score = 0;
-            state.answered = 0;
-            state.isGameOver = false;
-            state.isPaused = false;
-            state.isAnswering = false;
-            stopTimer();
-            pauseOverlay.classList.remove('visible');
-            showScreen('game-screen');
-            updateQuestion();
-            startTimer();
-        }
-
-        function updateQuestion() {
-            const q = state.currentQuestions[state.currentIndex];
-            if (!q) { endGame(); return; }
-            const lang = state.lang;
-            questionText.textContent = getText(q, lang, 'q');
-            const opts = getText(q, lang, 'o') || ['—','—','—','—'];
-            answerBtns.forEach((btn, i) => {
-                btn.textContent = opts[i] || '—';
-                btn.className = 'answer-btn';
-                btn.dataset.index = i;
-                btn.disabled = false;
-            });
-            categoryLabel.textContent = q.category || '';
-            const progress = ((state.currentIndex) / state.total) * 100;
-            progressBar.style.width = Math.min(progress, 100) + '%';
-            questionCounter.textContent = `${state.currentIndex + 1}/${state.total}`;
-            timerBar.style.width = '100%';
-            timerText.textContent = '10';
-            state.timerValue = 10;
-        }
-
-        function startTimer() {
-            stopTimer();
-            state.timerValue = 10;
-            timerBar.style.width = '100%';
-            timerText.textContent = '10';
-            state.timerInterval = setInterval(() => {
-                if (state.isPaused || state.isGameOver) return;
-                state.timerValue -= 0.1;
-                if (state.timerValue <= 0) {
-                    state.timerValue = 0;
-                    clearInterval(state.timerInterval);
-                    handleTimeout();
-                    return;
-                }
-                const percent = (state.timerValue / 10) * 100;
-                timerBar.style.width = percent + '%';
-                timerText.textContent = Math.ceil(state.timerValue);
-            }, 100);
-        }
-
-        function stopTimer() { clearInterval(state.timerInterval); }
-
-        function handleTimeout() {
-            if (state.isGameOver || state.isAnswering) return;
-            state.isAnswering = true;
-            state.answered++;
-            answerBtns.forEach(btn => btn.classList.add('disabled'));
-            const q = state.currentQuestions[state.currentIndex];
-            if (q) {
-                answerBtns.forEach((btn, i) => {
-                    if (i === q.ru.c) btn.classList.add('correct');
-                });
-            }
-            setTimeout(() => {
-                if (state.isGameOver) return;
-                if (state.currentIndex >= state.total - 1) {
-                    endGame();
-                } else {
-                    state.currentIndex++;
-                    state.isAnswering = false;
-                    answerBtns.forEach(btn => btn.classList.remove('disabled', 'correct', 'wrong'));
-                    updateQuestion();
-                    startTimer();
-                }
-            }, 700);
-        }
-
-        function handleAnswer(index) {
-            if (state.isPaused || state.isGameOver || state.isAnswering) return;
-            const q = state.currentQuestions[state.currentIndex];
-            if (!q) return;
-            stopTimer();
-            state.isAnswering = true;
-            const isCorrect = (index === q.ru.c);
-            if (isCorrect) state.score++;
-            state.answered++;
-            answerBtns.forEach((btn, i) => {
-                btn.classList.add('disabled');
-                if (i === q.ru.c) btn.classList.add('correct');
-                else if (i === index && !isCorrect) btn.classList.add('wrong');
-            });
-            setTimeout(() => {
-                if (state.isGameOver) return;
-                if (state.currentIndex >= state.total - 1) {
-                    endGame();
-                } else {
-                    state.currentIndex++;
-                    state.isAnswering = false;
-                    answerBtns.forEach(btn => btn.classList.remove('disabled', 'correct', 'wrong'));
-                    updateQuestion();
-                    startTimer();
-                }
-            }, 700);
-        }
-
-        function endGame() {
-            stopTimer();
-            state.isGameOver = true;
-            showScreen('result-screen');
-            updateResult();
-            showAd();
-        }
-
-        function updateResult() {
-            const t = ui[state.lang] || ui.ru;
-            resultText.textContent = `${t.correct}: ${state.score} ${t.outOf} ${state.total}`;
-            resultDetail.textContent = `${t.detail} ${state.answered} ${t.questions}`;
-        }
-
-        // ================================================================
-        // 8. РЕКЛАМА
-        // ================================================================
-        function showAd() {
-            if (typeof YaGames !== 'undefined') {
-                YaGames.init().then(ysdk => {
-                    ysdk.adv.showFullscreenAdv().catch(() => {});
-                }).catch(() => {});
-            }
-        }
-
-        // ================================================================
-        // 9. ПАУЗА
-        // ================================================================
-        function pauseGame() {
-            if (state.isGameOver) return;
-            state.isPaused = true;
-            stopTimer();
-            answerBtns.forEach(btn => btn.classList.add('disabled'));
-        }
-
-        function resumeGame() {
-            if (!state.isPaused) return;
-            state.isPaused = false;
-            pauseOverlay.classList.remove('visible');
-            answerBtns.forEach(btn => btn.classList.remove('disabled'));
-            if (!state.isGameOver) startTimer();
-        }
-
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                if (!state.isGameOver && !state.isPaused && gameScreen.classList.contains('active')) {
-                    pauseGame();
-                }
+        // =============================================
+        // 6. ПЕРЕКЛЮЧЕНИЕ ТЕМЫ
+        // =============================================
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.querySelector('.theme-toggle');
+            
+            if (body.classList.contains('light')) {
+                body.classList.remove('light');
+                body.classList.add('dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
             } else {
-                if (state.isPaused && !state.isGameOver) {
-                    pauseOverlay.classList.add('visible');
-                }
+                body.classList.remove('dark');
+                body.classList.add('light');
+                btn.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
             }
-        });
-
-        // ================================================================
-        // 10. ЗАГРУЗКА (автоопределение языка через SDK)
-        // ================================================================
-        async function boot() {
-            try {
-                const ysdk = await YaGames.init();
-                const lang = ysdk.environment.i18n.lang || 'ru';
-                const supported = ['ru','en','be','kk','uz'];
-                state.lang = supported.includes(lang) ? lang : 'ru';
-            } catch (e) {
-                state.lang = 'ru';
-            }
-            state.allQuestions = questions;
-            buildCategories();
-            applyUI(state.lang);
-            renderCategories(state.lang);
-            showScreen('menu-screen');
         }
 
-        // ================================================================
-        // 11. СОБЫТИЯ
-        // ================================================================
-        startBtn.addEventListener('click', () => {
-            renderCategories(state.lang);
-            showScreen('category-screen');
-        });
+        // ----- Загрузка сохранённой темы -----
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.classList.remove('light');
+            document.body.classList.add('dark');
+            document.querySelector('.theme-toggle').textContent = '☀️';
+        }
 
-        catStartBtn.addEventListener('click', initGame);
-
-        answerBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const idx = parseInt(e.currentTarget.dataset.index, 10);
-                handleAnswer(idx);
+        // =============================================
+        // 7. ВИБРАЦИЯ НА МОБИЛКАХ
+        // =============================================
+        if ('vibrate' in navigator) {
+            document.querySelectorAll('.glass-card').forEach(card => {
+                card.addEventListener('touchstart', () => {
+                    navigator.vibrate(10);
+                });
             });
-        });
+        }
 
-        restartBtn.addEventListener('click', initGame);
-
-        menuBtn.addEventListener('click', () => {
-            state.isGameOver = true;
-            stopTimer();
-            pauseOverlay.classList.remove('visible');
-            showScreen('menu-screen');
-        });
-
-        resumeBtn.addEventListener('click', resumeGame);
-
-        // ================================================================
-        // 12. ЗАПУСК
-        // ================================================================
-        boot();
-        console.log('✅ Викторина загружена. Всего вопросов:', questions.length);
-        console.log('📚 Язык:', state.lang);
-        console.log('📂 Категорий:', Object.keys(state.categoryQuestions).length);
-    })();
+        // =============================================
+        // 8. КОНСОЛЬНОЕ ПРИВЕТСТВИЕ
+        // =============================================
+        console.log('%c✦ Привет! ✦', 'font-size: 20px; color: #80deea; font-weight: bold;');
+        console.log('%cСайт-визитка в стиле "жидкое стекло"', 'font-size: 14px; color: #f8bbd0;');
+        console.log('%cЦитаты обновляются каждые 15 секунд', 'font-size: 12px; color: #b3e5fc;');
     </script>
+
 </body>
 </html>
