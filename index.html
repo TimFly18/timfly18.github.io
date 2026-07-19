@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Анастасия</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>Визитка | Жидкое стекло</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,16 +18,23 @@
             box-sizing: border-box;
         }
 
+        html {
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Quicksand', sans-serif;
-            padding: 20px;
+            padding: 12px;
             transition: background 0.5s, color 0.5s;
             position: relative;
             overflow: hidden;
+            touch-action: manipulation;
         }
 
         /* Светлая тема (по умолчанию) */
@@ -58,6 +65,7 @@
             height: 100%;
             z-index: 0;
             pointer-events: none;
+            touch-action: none;
         }
 
         /* ===== СТЕКЛЯННЫЕ ПУЗЫРЬКИ ===== */
@@ -79,6 +87,7 @@
             opacity: 0.15;
             animation: rise linear infinite;
             pointer-events: none;
+            will-change: transform;
         }
 
         body.light .bubble {
@@ -109,11 +118,11 @@
         .glass-wrapper {
             max-width: 950px;
             width: 100%;
-            padding: 30px 25px;
+            padding: 20px 16px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(16px) saturate(200%);
             -webkit-backdrop-filter: blur(16px) saturate(200%);
-            border-radius: 60px 20px 60px 20px;
+            border-radius: 40px 12px 40px 12px;
             box-shadow: 0 20px 50px rgba(0, 40, 60, 0.15),
                         inset 0 0 0 1px rgba(255, 255, 255, 0.5);
             transition: all 0.3s ease;
@@ -143,18 +152,18 @@
         }
 
         .glass-wrapper::before {
-            width: 150px;
-            height: 150px;
-            top: -30px;
-            right: -20px;
+            width: 120px;
+            height: 120px;
+            top: -20px;
+            right: -15px;
             background: radial-gradient(circle at 30% 30%, rgba(255, 220, 240, 0.3), rgba(180, 230, 240, 0.05));
         }
 
         .glass-wrapper::after {
-            width: 200px;
-            height: 200px;
-            bottom: -60px;
-            left: -40px;
+            width: 160px;
+            height: 160px;
+            bottom: -40px;
+            left: -30px;
             background: radial-gradient(circle at 70% 70%, rgba(160, 230, 240, 0.2), rgba(255, 200, 220, 0.05));
         }
 
@@ -163,24 +172,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 8px 5px;
+            margin-bottom: 16px;
+            padding: 4px 2px;
             position: relative;
             z-index: 2;
+            gap: 10px;
         }
 
         .date-display {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #1d4b5e;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             background: rgba(255, 255, 255, 0.15);
-            padding: 8px 18px;
+            padding: 6px 14px;
             border-radius: 30px;
             backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 1;
+            min-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
         }
 
         body.dark .date-display {
@@ -190,7 +205,13 @@
         }
 
         .date-display .icon {
-            font-size: 1.2rem;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        #currentDate {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Кнопка переключения темы (справа) */
@@ -200,20 +221,23 @@
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50px;
-            padding: 10px 16px;
+            padding: 8px 14px;
             color: #1e3b4a;
             cursor: pointer;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
+            flex-shrink: 0;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .theme-toggle:hover {
-            transform: scale(1.1);
-            background: rgba(255, 255, 255, 0.3);
+        .theme-toggle:active {
+            transform: scale(0.92);
         }
 
         body.dark .theme-toggle {
@@ -222,18 +246,27 @@
             border-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* ===== 3D-ЭФФЕКТ ДЛЯ КОНТЕЙНЕРА ===== */
-        .glass-wrapper.tilt {
-            transition: transform 0.1s ease-out;
+        /* Отключаем hover на мобилках */
+        @media (hover: none) {
+            .theme-toggle:hover {
+                transform: none;
+            }
+        }
+
+        /* ===== 3D-ЭФФЕКТ ТОЛЬКО ДЛЯ ДЕСКТОПА ===== */
+        @media (hover: hover) and (pointer: fine) {
+            .glass-wrapper.tilt {
+                transition: transform 0.1s ease-out;
+            }
         }
 
         /* ----- сетка с блоками ----- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
             justify-content: center;
-            margin-top: 10px;
+            margin-top: 8px;
             position: relative;
             z-index: 1;
         }
@@ -244,8 +277,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px 12px;
-            border-radius: 40px 12px 40px 12px;
+            padding: 16px 10px;
+            border-radius: 32px 10px 32px 10px;
             box-shadow: 0 8px 25px rgba(0, 30, 40, 0.08),
                         inset 0 0 0 1px rgba(255, 255, 255, 0.5);
             border: 2px solid transparent;
@@ -256,17 +289,18 @@
             color: #1e3b4a;
             font-weight: 600;
             text-align: center;
-            min-height: 150px;
+            min-height: 120px;
             transform: scale(1);
             word-break: break-word;
             position: relative;
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 0.6s ease forwards;
-            /* Анимированный градиент */
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(200, 240, 255, 0.15), rgba(255, 200, 220, 0.15));
             background-size: 300% 300%;
             animation: cardGradient 6s ease-in-out infinite alternate, fadeInUp 0.6s ease forwards;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body.dark .glass-card {
@@ -288,7 +322,6 @@
             100% { background-position: 0% 50%; background: linear-gradient(135deg, rgba(30, 50, 70, 0.3), rgba(20, 60, 80, 0.2), rgba(70, 30, 50, 0.2)); }
         }
 
-        /* Анимация появления с задержкой (переопределяем, чтобы не конфликтовать) */
         .glass-card:nth-child(1) { animation-delay: 0.05s; }
         .glass-card:nth-child(2) { animation-delay: 0.1s; }
         .glass-card:nth-child(3) { animation-delay: 0.15s; }
@@ -309,7 +342,7 @@
             content: '';
             position: absolute;
             inset: -2px;
-            border-radius: 40px 12px 40px 12px;
+            border-radius: 32px 10px 32px 10px;
             padding: 2px;
             background: linear-gradient(135deg, #80deea, #f8bbd0, #b3e5fc);
             background-size: 300% 300%;
@@ -338,75 +371,88 @@
             100% { background-position: 100% 50%; background: linear-gradient(135deg, #f48fb1, #4fc3f7, #4dd0e1); }
         }
 
-        .glass-card:hover::before {
-            opacity: 1;
-        }
-
-        /* Свечение при наведении */
-        .glass-card:hover {
-            transform: scale(1.05) translateY(-8px);
-            box-shadow: 0 0 40px rgba(100, 200, 255, 0.2),
-                        0 0 80px rgba(255, 150, 200, 0.15),
-                        0 18px 40px rgba(0, 60, 80, 0.15),
-                        inset 0 0 0 1px rgba(255, 255, 255, 0.7);
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        body.dark .glass-card:hover {
-            box-shadow: 0 0 40px rgba(100, 200, 255, 0.3),
-                        0 0 80px rgba(255, 150, 200, 0.2),
-                        0 18px 40px rgba(0, 0, 0, 0.4);
-        }
-
         .glass-card:active {
-            transform: scale(0.95);
+            transform: scale(0.95) !important;
         }
 
-        /* Всплывающая подсказка (tooltip) */
+        /* Отключаем hover-эффекты на мобилках */
+        @media (hover: hover) and (pointer: fine) {
+            .glass-card:hover {
+                transform: scale(1.05) translateY(-8px);
+                box-shadow: 0 0 40px rgba(100, 200, 255, 0.2),
+                            0 0 80px rgba(255, 150, 200, 0.15),
+                            0 18px 40px rgba(0, 60, 80, 0.15),
+                            inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+                border-color: rgba(255, 255, 255, 0.4);
+            }
+
+            body.dark .glass-card:hover {
+                box-shadow: 0 0 40px rgba(100, 200, 255, 0.3),
+                            0 0 80px rgba(255, 150, 200, 0.2),
+                            0 18px 40px rgba(0, 0, 0, 0.4);
+            }
+
+            .glass-card:hover .card-icon {
+                transform: scale(1.1) rotate(-5deg);
+            }
+
+            .glass-card:hover .card-label {
+                background: rgba(255, 255, 255, 0.5);
+            }
+
+            body.dark .glass-card:hover .card-label {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .glass-card:hover::after {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        /* Всплывающая подсказка (tooltip) - скрываем на мобилках */
         .glass-card::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: calc(100% + 10px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            opacity: 0;
-            transition: opacity 0.3s, transform 0.3s;
-            white-space: nowrap;
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            pointer-events: none;
-            transform: translateX(-50%) translateY(5px);
-            z-index: 100;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: none;
         }
 
-        .glass-card:hover::after {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
+        @media (hover: hover) and (pointer: fine) {
+            .glass-card::after {
+                display: block;
+                content: attr(data-tooltip);
+                position: absolute;
+                bottom: calc(100% + 10px);
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-size: 0.75rem;
+                opacity: 0;
+                transition: opacity 0.3s, transform 0.3s;
+                white-space: nowrap;
+                backdrop-filter: blur(8px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                pointer-events: none;
+                transform: translateX(-50%) translateY(5px);
+                z-index: 100;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
         }
 
         /* ----- иконки и текст внутри блоков ----- */
         .card-icon {
-            font-size: 2.6rem;
-            margin-bottom: 10px;
+            font-size: 2.2rem;
+            margin-bottom: 8px;
             filter: drop-shadow(0 4px 8px rgba(0, 30, 40, 0.1));
             transition: transform 0.3s;
         }
 
-        .glass-card:hover .card-icon {
-            transform: scale(1.1) rotate(-5deg);
-        }
-
         .card-label {
-            font-size: 1rem;
-            letter-spacing: 0.4px;
+            font-size: 0.85rem;
+            letter-spacing: 0.3px;
             background: rgba(255, 255, 255, 0.3);
-            padding: 6px 14px;
+            padding: 5px 12px;
             border-radius: 60px;
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -415,10 +461,7 @@
             color: inherit;
             text-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
             transition: background 0.3s;
-        }
-
-        .glass-card:hover .card-label {
-            background: rgba(255, 255, 255, 0.5);
+            font-size: clamp(0.7rem, 2.5vw, 0.95rem);
         }
 
         body.dark .card-label {
@@ -426,18 +469,14 @@
             border-color: rgba(255, 255, 255, 0.1);
         }
 
-        body.dark .glass-card:hover .card-label {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         /* Индикатор онлайн */
         .online-indicator {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             background: #4caf50;
             border-radius: 50%;
-            margin-left: 8px;
+            margin-left: 5px;
             animation: pulse 1.5s ease-in-out infinite;
         }
 
@@ -448,16 +487,16 @@
 
         /* ----- заголовок ----- */
         .header-title {
-            font-size: 2.1rem;
+            font-size: clamp(1.5rem, 6vw, 2.1rem);
             font-weight: 700;
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #1d4b5e;
             letter-spacing: 1px;
             text-shadow: 0 4px 15px rgba(255, 255, 255, 0.4);
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(6px);
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 100px;
             display: inline-block;
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -481,9 +520,9 @@
         /* ===== СЛУЧАЙНАЯ ЦИТАТА ===== */
         .quote-container {
             text-align: center;
-            margin: 5px 0 20px 0;
-            padding: 8px 20px;
-            font-size: 1rem;
+            margin: 4px 0 16px 0;
+            padding: 6px 16px;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
             font-style: italic;
             color: #2d5a6b;
             opacity: 0.8;
@@ -492,11 +531,11 @@
             border-radius: 30px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s;
-            min-height: 40px;
+            min-height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
@@ -507,25 +546,28 @@
         }
 
         .quote-container .quote-icon {
-            font-size: 1.2rem;
+            font-size: clamp(0.9rem, 2vw, 1.2rem);
             opacity: 0.6;
+            flex-shrink: 0;
         }
 
         .quote-container .quote-text {
             font-weight: 400;
+            line-height: 1.4;
         }
 
         .quote-container .quote-author {
             font-weight: 600;
             opacity: 0.7;
-            font-size: 0.85rem;
+            font-size: clamp(0.7rem, 2vw, 0.85rem);
+            flex-shrink: 0;
         }
 
         /* Подпись внизу */
         .footer-text {
             text-align: center;
-            margin-top: 28px;
-            font-size: 1.1rem;
+            margin-top: 22px;
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
             color: #2d5a6b;
             opacity: 0.8;
             letter-spacing: 2px;
@@ -536,60 +578,248 @@
             transition: all 0.3s;
         }
 
-        .footer-text:hover {
-            opacity: 1;
-            transform: scale(1.02);
-        }
-
         body.dark .footer-text {
             color: #8ab3c4;
         }
 
-        /* ----- адаптивность ----- */
-        @media (max-width: 600px) {
+        /* ===== АДАПТИВНОСТЬ ДЛЯ МОБИЛЬНЫХ ===== */
+
+        /* Маленькие телефоны (до 480px) */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+                align-items: flex-start;
+                padding-top: 12px;
+            }
+
             .glass-wrapper {
-                padding: 20px 15px;
-                border-radius: 40px 10px 40px 10px;
+                padding: 14px 12px;
+                border-radius: 30px 8px 30px 8px;
             }
+
             .grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 16px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
+
             .glass-card {
-                min-height: 120px;
-                padding: 16px 8px;
+                min-height: 100px;
+                padding: 12px 6px;
+                border-radius: 24px 8px 24px 8px;
             }
+
+            .glass-card::before {
+                border-radius: 24px 8px 24px 8px;
+            }
+
             .card-icon {
-                font-size: 2.2rem;
+                font-size: 1.8rem;
+                margin-bottom: 4px;
             }
-            .header-title {
-                font-size: 1.6rem;
-                padding: 8px 16px;
+
+            .card-label {
+                font-size: 0.7rem;
+                padding: 4px 8px;
             }
-            .glass-card::after {
-                display: none;
-            }
-            .theme-toggle {
-                padding: 8px 14px;
-                font-size: 1.2rem;
-            }
-            .footer-text {
-                font-size: 0.9rem;
-            }
+
             .date-display {
-                font-size: 0.75rem;
-                padding: 6px 12px;
+                font-size: 0.7rem;
+                padding: 4px 10px;
             }
+
             .date-display .icon {
+                font-size: 0.85rem;
+            }
+
+            .theme-toggle {
+                padding: 6px 10px;
                 font-size: 1rem;
             }
+
             .top-bar {
-                margin-bottom: 12px;
+                margin-bottom: 10px;
+                gap: 6px;
             }
-            .quote-container {
-                font-size: 0.85rem;
+
+            .header-title {
+                font-size: 1.3rem;
                 padding: 6px 14px;
-                min-height: 32px;
+                margin-bottom: 4px;
+            }
+
+            .quote-container {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+                min-height: 28px;
+                margin: 2px 0 10px 0;
+                gap: 4px;
+            }
+
+            .quote-container .quote-icon {
+                font-size: 0.8rem;
+            }
+
+            .quote-container .quote-author {
+                font-size: 0.65rem;
+            }
+
+            .footer-text {
+                font-size: 0.8rem;
+                margin-top: 14px;
+            }
+
+            .online-indicator {
+                width: 6px;
+                height: 6px;
+            }
+
+            /* Скрываем декоративные капли */
+            .glass-wrapper::before,
+            .glass-wrapper::after {
+                display: none;
+            }
+        }
+
+        /* Телефоны среднего размера (481px - 768px) */
+        @media (min-width: 481px) and (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+
+            .glass-wrapper {
+                padding: 18px 14px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 14px;
+            }
+
+            .glass-card {
+                min-height: 110px;
+                padding: 14px 8px;
+            }
+
+            .card-icon {
+                font-size: 2rem;
+            }
+
+            .card-label {
+                font-size: 0.8rem;
+                padding: 4px 10px;
+            }
+
+            .date-display {
+                font-size: 0.8rem;
+                padding: 5px 12px;
+            }
+
+            .theme-toggle {
+                padding: 7px 12px;
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Планшеты (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Большие экраны (>1024px) */
+        @media (min-width: 1025px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+
+            .glass-card {
+                min-height: 150px;
+                padding: 20px 12px;
+            }
+
+            .card-icon {
+                font-size: 2.6rem;
+            }
+
+            .card-label {
+                font-size: 1rem;
+                padding: 6px 14px;
+            }
+        }
+
+        /* Альбомная ориентация на телефонах */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+
+            .glass-card {
+                min-height: 80px;
+                padding: 10px 6px;
+            }
+
+            .card-icon {
+                font-size: 1.5rem;
+                margin-bottom: 2px;
+            }
+
+            .card-label {
+                font-size: 0.65rem;
+                padding: 3px 6px;
+            }
+
+            .glass-wrapper {
+                padding: 12px 10px;
+            }
+
+            .header-title {
+                font-size: 1.2rem;
+                padding: 4px 12px;
+                margin-bottom: 2px;
+            }
+
+            .quote-container {
+                font-size: 0.7rem;
+                padding: 3px 8px;
+                min-height: 22px;
+                margin: 2px 0 8px 0;
+            }
+
+            .top-bar {
+                margin-bottom: 6px;
+            }
+
+            .date-display {
+                font-size: 0.65rem;
+                padding: 3px 8px;
+            }
+
+            .theme-toggle {
+                padding: 4px 8px;
+                font-size: 0.9rem;
+            }
+
+            .footer-text {
+                font-size: 0.7rem;
+                margin-top: 8px;
+            }
+        }
+
+        /* Отключаем анимации на слабых устройствах */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Убираем скролл на мобилках если контент помещается */
+        @media (max-width: 480px) {
+            .glass-wrapper {
+                overflow: visible;
             }
         }
     </style>
@@ -679,24 +909,26 @@
         </div>
     </div>
 
-    <!-- Библиотека для частиц -->
     <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
 
     <script>
         // =============================================
-        // 1. ИНТЕРАКТИВНЫЙ ФОН С РЯБЬЮ
+        // 1. ИНТЕРАКТИВНЫЙ ФОН С РЯБЬЮ (адаптирован для мобилок)
         // =============================================
         (function() {
             const canvas = document.getElementById('rippleCanvas');
             const ctx = canvas.getContext('2d');
             let width, height;
             let ripples = [];
-            const MAX_RIPPLES = 15;
+            const MAX_RIPPLES = 12;
             let mouseX = -1000, mouseY = -1000;
+            let isMobile = window.innerWidth < 768;
+            let touchActive = false;
 
             function resize() {
                 width = canvas.width = window.innerWidth;
                 height = canvas.height = window.innerHeight;
+                isMobile = window.innerWidth < 768;
             }
             window.addEventListener('resize', resize);
             resize();
@@ -706,15 +938,15 @@
                     this.x = x;
                     this.y = y;
                     this.radius = 0;
-                    this.maxRadius = Math.max(width, height) * 0.6;
-                    this.speed = 2 + Math.random() * 3;
-                    this.opacity = 0.6;
+                    this.maxRadius = Math.max(width, height) * 0.5;
+                    this.speed = isMobile ? 1.5 + Math.random() * 2 : 2 + Math.random() * 3;
+                    this.opacity = isMobile ? 0.4 : 0.6;
                     this.color = `hsla(${190 + Math.random() * 30}, 70%, 70%, `;
                 }
 
                 update() {
                     this.radius += this.speed;
-                    this.opacity = 0.6 * (1 - this.radius / this.maxRadius);
+                    this.opacity = (isMobile ? 0.4 : 0.6) * (1 - this.radius / this.maxRadius);
                     return this.radius < this.maxRadius && this.opacity > 0.01;
                 }
 
@@ -722,15 +954,14 @@
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                     ctx.strokeStyle = this.color + this.opacity + ')';
-                    ctx.lineWidth = 2;
+                    ctx.lineWidth = isMobile ? 1 : 2;
                     ctx.stroke();
 
-                    // Внутреннее свечение
                     const gradient = ctx.createRadialGradient(
                         this.x, this.y, 0,
                         this.x, this.y, this.radius
                     );
-                    gradient.addColorStop(0, this.color + (this.opacity * 0.2) + ')');
+                    gradient.addColorStop(0, this.color + (this.opacity * 0.15) + ')');
                     gradient.addColorStop(1, this.color + '0)');
                     ctx.fillStyle = gradient;
                     ctx.fill();
@@ -747,19 +978,14 @@
             function animateRipples() {
                 ctx.clearRect(0, 0, width, height);
 
-                // Автоматические ряби от движения мыши
-                if (mouseX > 0 && mouseY > 0) {
-                    // Добавляем рябь от мыши с задержкой
-                }
-
                 ripples = ripples.filter(ripple => {
                     ripple.update();
                     ripple.draw();
                     return ripple.radius < ripple.maxRadius && ripple.opacity > 0.01;
                 });
 
-                // Добавляем случайные ряби для красоты
-                if (Math.random() < 0.02) {
+                // На мобилках реже добавляем случайные ряби
+                if (Math.random() < (isMobile ? 0.008 : 0.02)) {
                     const x = Math.random() * width;
                     const y = Math.random() * height;
                     addRipple(x, y);
@@ -768,85 +994,116 @@
                 requestAnimationFrame(animateRipples);
             }
 
-            // События мыши
+            // События мыши (десктоп)
             document.addEventListener('mousemove', (e) => {
+                if (isMobile) return;
                 mouseX = e.clientX;
                 mouseY = e.clientY;
-                if (Math.random() < 0.1) {
+                if (Math.random() < 0.08) {
                     addRipple(e.clientX, e.clientY);
                 }
             });
 
             document.addEventListener('click', (e) => {
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < (isMobile ? 2 : 3); i++) {
                     setTimeout(() => {
                         addRipple(
-                            e.clientX + (Math.random() - 0.5) * 40,
-                            e.clientY + (Math.random() - 0.5) * 40
+                            e.clientX + (Math.random() - 0.5) * (isMobile ? 20 : 40),
+                            e.clientY + (Math.random() - 0.5) * (isMobile ? 20 : 40)
                         );
-                    }, i * 100);
+                    }, i * (isMobile ? 150 : 100));
                 }
             });
 
-            // Добавляем начальные ряби
-            for (let i = 0; i < 5; i++) {
+            // События касаний (мобилки)
+            document.addEventListener('touchstart', (e) => {
+                touchActive = true;
+                const touch = e.touches[0];
+                for (let i = 0; i < 2; i++) {
+                    setTimeout(() => {
+                        addRipple(
+                            touch.clientX + (Math.random() - 0.5) * 30,
+                            touch.clientY + (Math.random() - 0.5) * 30
+                        );
+                    }, i * 150);
+                }
+            });
+
+            document.addEventListener('touchmove', (e) => {
+                if (!touchActive) return;
+                const touch = e.touches[0];
+                if (Math.random() < 0.05) {
+                    addRipple(touch.clientX, touch.clientY);
+                }
+            });
+
+            document.addEventListener('touchend', () => {
+                touchActive = false;
+            });
+
+            // Начальные ряби
+            for (let i = 0; i < (isMobile ? 3 : 5); i++) {
                 setTimeout(() => {
                     addRipple(
                         Math.random() * width,
                         Math.random() * height
                     );
-                }, i * 300);
+                }, i * (isMobile ? 500 : 300));
             }
 
             animateRipples();
         })();
 
         // =============================================
-        // 2. СТЕКЛЯННЫЕ ПУЗЫРЬКИ
+        // 2. СТЕКЛЯННЫЕ ПУЗЫРЬКИ (адаптированы для мобилок)
         // =============================================
         (function() {
             const container = document.getElementById('bubblesContainer');
-            const bubbleCount = 20;
+            const isMobile = window.innerWidth < 768;
+            const bubbleCount = isMobile ? 12 : 20;
 
             for (let i = 0; i < bubbleCount; i++) {
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
-                const size = 20 + Math.random() * 60;
+                const size = isMobile ? 15 + Math.random() * 35 : 20 + Math.random() * 60;
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
                 bubble.style.left = Math.random() * 100 + '%';
-                bubble.style.animationDuration = 15 + Math.random() * 25 + 's';
-                bubble.style.animationDelay = Math.random() * 20 + 's';
-                bubble.style.opacity = 0.05 + Math.random() * 0.15;
+                bubble.style.animationDuration = (isMobile ? 18 : 15) + Math.random() * (isMobile ? 20 : 25) + 's';
+                bubble.style.animationDelay = Math.random() * (isMobile ? 15 : 20) + 's';
+                bubble.style.opacity = (isMobile ? 0.03 : 0.05) + Math.random() * (isMobile ? 0.1 : 0.15);
                 container.appendChild(bubble);
             }
         })();
 
         // =============================================
-        // 3. 3D-ЭФФЕКТ ПРИ НАКЛОНЕ МЫШИ
+        // 3. 3D-ЭФФЕКТ (только для десктопа)
         // =============================================
         (function() {
             const wrapper = document.getElementById('glassWrapper');
+            const isMobile = window.innerWidth < 768;
             let isHovering = false;
 
-            wrapper.addEventListener('mouseenter', () => {
-                isHovering = true;
-            });
+            if (!isMobile) {
+                wrapper.addEventListener('mouseenter', () => {
+                    isHovering = true;
+                });
 
-            wrapper.addEventListener('mouseleave', () => {
-                isHovering = false;
-                wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
-            });
+                wrapper.addEventListener('mouseleave', () => {
+                    isHovering = false;
+                    wrapper.style.transform = 'rotateX(0deg) rotateY(0deg)';
+                });
 
-            wrapper.addEventListener('mousemove', (e) => {
-                if (!isHovering) return;
-                const rect = wrapper.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width - 0.5;
-                const y = (e.clientY - rect.top) / rect.height - 0.5;
-                const rotateX = -y * 8;
-                const rotateY = x * 8;
-                wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-            });
+                wrapper.addEventListener('mousemove', (e) => {
+                    if (!isHovering) return;
+                    const rect = wrapper.getBoundingClientRect();
+                    const x = (e.clientX - rect.left) / rect.width - 0.5;
+                    const y = (e.clientY - rect.top) / rect.height - 0.5;
+                    const rotateX = -y * 8;
+                    const rotateY = x * 8;
+                    wrapper.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+                });
+            }
         })();
 
         // =============================================
@@ -854,10 +1111,11 @@
         // =============================================
         function updateDate() {
             const now = new Date();
+            const isMobile = window.innerWidth < 480;
             const options = { 
-                weekday: 'long', 
+                weekday: isMobile ? 'short' : 'long',
                 year: 'numeric', 
-                month: 'long', 
+                month: isMobile ? 'short' : 'long',
                 day: 'numeric',
                 timeZone: 'Europe/Moscow'
             };
@@ -865,6 +1123,9 @@
             document.getElementById('currentDate').textContent = dateString;
         }
         updateDate();
+
+        // Обновляем дату при изменении ориентации
+        window.addEventListener('resize', updateDate);
 
         // =============================================
         // 5. СЛУЧАЙНАЯ ЦИТАТА
@@ -883,7 +1144,6 @@
             { text: "Ваше время ограничено, не тратьте его, проживая чужую жизнь.", author: "Стив Джобс" },
             { text: "Чтобы дойти до цели, нужно идти.", author: "Оноре де Бальзак" },
             { text: "Победа любит старание.", author: "Овидий" },
-            { text: "В двух вещах нет предела: во вселенной и в человеческой глупости.", author: "Альберт Эйнштейн" },
             { text: "Мы не можем изменить направление ветра, но мы можем настроить паруса.", author: "Джим Рон" }
         ];
 
@@ -917,7 +1177,6 @@
             }
         }
 
-        // ----- Загрузка сохранённой темы -----
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.classList.remove('light');
@@ -928,10 +1187,10 @@
         // =============================================
         // 7. ВИБРАЦИЯ НА МОБИЛКАХ
         // =============================================
-        if ('vibrate' in navigator) {
+        if ('vibrate' in navigator && window.innerWidth < 768) {
             document.querySelectorAll('.glass-card').forEach(card => {
                 card.addEventListener('touchstart', () => {
-                    navigator.vibrate(10);
+                    navigator.vibrate(8);
                 });
             });
         }
@@ -941,7 +1200,7 @@
         // =============================================
         console.log('%c✦ Привет! ✦', 'font-size: 20px; color: #80deea; font-weight: bold;');
         console.log('%cСайт-визитка в стиле "жидкое стекло"', 'font-size: 14px; color: #f8bbd0;');
-        console.log('%cЦитаты обновляются каждые 15 секунд', 'font-size: 12px; color: #b3e5fc;');
+        console.log('%cАдаптирован для мобильных устройств', 'font-size: 12px; color: #b3e5fc;');
     </script>
 
 </body>
