@@ -438,7 +438,7 @@ footer{border-top:1px solid var(--line); padding:50px 0 30px; overflow:hidden}
     <div>
       <div class="kicker">Immortal // топ-300 // Dota 2</div>
       <h1 class="big" id="scramble" data-text="KIRA">KIRA</h1>
-      <p class="hero-sub">Стример, капитан своих катков и твой личный тренер по мили-миду. Каждую ночь <b>разваливаю рейтинг соло</b> и объясняю, почему ваш мидер опять отдал руну на шестой минуте.</p>
+      <p class="hero-sub">Стример, капитан своих каток и твой личный наставник по миду. Каждую ночь <b>разваливаю рейтинг соло</b> и объясняю, почему ваш мидер опять отдал руну на шестой минуте.</p>
       <div class="chips">
         <div class="chip"><small>Соло MMR</small><b class="acc"><span class="cnt" data-count="7842">0</span></b></div>
         <div class="chip"><small>Twitch</small><b>48.2K</b></div>
@@ -501,7 +501,7 @@ footer{border-top:1px solid var(--line); padding:50px 0 30px; overflow:hidden}
       <div class="about-sticky rv">
         <div class="dossier frame">
           <img src="https://image.qwenlm.ai/public_source/97506395-c81f-4c77-8409-288acdfc2c7a/183e7d2b3-c734-476f-801c-9a0c05266cdd.png" alt="Портрет KIRA">
-          <p class="q">«Пока другие ждут удобный патч — <em>я просто жму “Поиск матча”</em>.»</p>
+          <p class="q">«Пока другие ждут удобный патч — <em>я просто жму "Поиск матча"</em>.»</p>
           <div class="sig">// KIRA, записка на мониторе</div>
           <div class="medal">
             <div class="hex">IM</div>
@@ -883,50 +883,51 @@ if(!reduced && finePointer){
 
 /* ---------- УГЛИ-ЧАСТИЦЫ ---------- */
 var cv = document.getElementById('embers');
-var ctx = cv.getContext('2d');
-var W=0, H=0, ps=[], colA='#ee3d3d', colB='#e6b455';
-function hexToRgb(h){
-  h = h.trim().replace('#','');
-  if(h.length===3) h = h.split('').map(function(c){return c+c;}).join('');
-  return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
-}
-function readThemeColors(){
-  var cs = getComputedStyle(root);
-  colA = cs.getPropertyValue('--accent') || colA;
-  colB = cs.getPropertyValue('--gold') || colB;
-}
-readThemeColors();
-function spawn(any){
-  return { x:Math.random()*W, y:any?Math.random()*H:H+12,
-    r:.6+Math.random()*1.9, vy:.25+Math.random()*.75, vx:(Math.random()-.5)*.3,
-    a:.12+Math.random()*.45, gold:Math.random()<.32, t:Math.random()*100 };
-}
-function resize(){
-  W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
-  var n = Math.min(90, Math.floor(W*H/18000));
-  ps = []; for(var i=0;i<n;i++) ps.push(spawn(true));
-}
-window.addEventListener('resize', resize);
-resize();
-if(!reduced){
-  (function loop(){
-    ctx.clearRect(0,0,W,H);
-    for(var i=0;i<ps.length;i++){
-      var p = ps[i];
-      p.t += .02; p.y -= p.vy; p.x += p.vx + Math.sin(p.t)*.18;
-      if(p.y < -14){ ps[i] = spawn(false); continue; }
-      var fl = p.a * (0.7 + Math.sin(p.t*3)*.3);
-      var c = hexToRgb(p.gold ? colB : colA);
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, 6.2832);
-      ctx.fillStyle = 'rgba('+c[0]+','+c[1]+','+c[2]+','+fl.toFixed(3)+')';
-      ctx.fill();
-    }
-    requestAnimationFrame(loop);
-  })();
+if(cv){
+  var ctx = cv.getContext('2d');
+  var W=0, H=0, ps=[], colA='#ee3d3d', colB='#e6b455';
+  function hexToRgb(h){
+    h = h.trim().replace('#','');
+    if(h.length===3) h = h.split('').map(function(c){return c+c;}).join('');
+    return [parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)];
+  }
+  function readThemeColors(){
+    var cs = getComputedStyle(root);
+    colA = cs.getPropertyValue('--accent') || colA;
+    colB = cs.getPropertyValue('--gold') || colB;
+  }
+  readThemeColors();
+  function spawn(any){
+    return { x:Math.random()*W, y:any?Math.random()*H:H+12,
+      r:.6+Math.random()*1.9, vy:.25+Math.random()*.75, vx:(Math.random()-.5)*.3,
+      a:.12+Math.random()*.45, gold:Math.random()<.32, t:Math.random()*100 };
+  }
+  function resize(){
+    W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
+    var n = Math.min(90, Math.floor(W*H/18000));
+    ps = []; for(var i=0;i<n;i++) ps.push(spawn(true));
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  if(!reduced){
+    (function loop(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<ps.length;i++){
+        var p = ps[i];
+        p.t += .02; p.y -= p.vy; p.x += p.vx + Math.sin(p.t)*.18;
+        if(p.y < -14){ ps[i] = spawn(false); continue; }
+        var fl = p.a * (0.7 + Math.sin(p.t*3)*.3);
+        var c = hexToRgb(p.gold ? colB : colA);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, 6.2832);
+        ctx.fillStyle = 'rgba('+c[0]+','+c[1]+','+c[2]+','+fl.toFixed(3)+')';
+        ctx.fill();
+      }
+      requestAnimationFrame(loop);
+    })();
+  }
 }
 })();
 </script>
 </body>
 </html>
-
