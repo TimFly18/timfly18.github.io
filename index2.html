@@ -834,7 +834,7 @@ fBtns.forEach(function(b){
     b.classList.add('active');
     var f = b.dataset.filter, shown = 0;
     rows.forEach(function(r){
-      var ok = (f==='all') || (r.dataset.result===f);
+      var ok = (f === 'all') || (r.dataset.result === f);
       r.style.display = ok ? '' : 'none';
       if(ok) shown++;
     });
